@@ -1,0 +1,2 @@
+"""Standalone APEX fresh app."""
+

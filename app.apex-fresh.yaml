@@ -1,0 +1,20 @@
+command:
+  - uvicorn
+  - apex_fresh.app.main:app
+  - --host
+  - 0.0.0.0
+  - --port
+  - "8001"
+
+env:
+  - name: APEX_FRESH_DATABRICKS_PROFILE
+    value: fe-vm
+  - name: APEX_FRESH_CATALOG
+    value: apex_fresh
+  - name: APEX_FRESH_APP_NAME
+    value: apex-fresh-energy-app
+
+resources:
+  - name: apex-fresh-db
+    type: lakebase_database
+

@@ -1,0 +1,59 @@
+name: Deploy NEXUS Public
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Databricks CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+
+      - name: Configure Databricks CLI profile
+        run: |
+          mkdir -p ~/.databricks
+          cat > ~/.databrickscfg <<EOF
+          [fe-vm]
+          host = ${DATABRICKS_HOST}
+          token = ${DATABRICKS_TOKEN}
+          EOF
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run backend tests
+        run: pytest app/backend/tests/
+
+      - name: Build frontend
+        run: |
+          cd app/frontend
+          npm ci
+          npm run build
+
+      - name: Sync to Databricks workspace
+        run: databricks sync . /Workspace/Users/${{ github.actor }}/nexus-energy-trading-app --profile fe-vm
+
+      - name: Deploy Databricks App
+        run: databricks apps deploy nexus-energy-trading-app --source-code-path . --profile fe-vm

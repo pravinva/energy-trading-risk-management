@@ -1,0 +1,111 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`primitives > DataTable renders 1`] = `
+<div>
+  <table
+    style="border-radius: 0px;"
+  >
+    <thead
+      style="background: var(--color-bg-elevated);"
+    >
+      <tr>
+        <th>
+          VALUE
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        style="background: var(--color-bg-base); cursor: default;"
+      >
+        <td
+          class="text-right font-data text-tabular"
+          style="color: var(--color-positive);"
+        >
+          1
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`primitives > Metric renders 1`] = `
+<div>
+  <div>
+    <div
+      class="label-caps"
+    >
+      X
+    </div>
+    <div
+      class="font-data text-tabular"
+      style="font-size: var(--text-2xl); font-weight: 600;"
+    >
+      10
+       
+      MW
+    </div>
+    <div
+      style="color: var(--color-positive);"
+    >
+      Change
+      : 
+      2
+    </div>
+  </div>
+</div>
+`;
+
+exports[`primitives > Panel renders 1`] = `
+<div>
+  <div
+    style="background: var(--color-bg-base); border-left: 2px solid transparent; border-radius: var(--radius-none);"
+  >
+    <div
+      style="display: flex; align-items: center; justify-content: space-between; background: var(--color-bg-elevated); padding: var(--space-3); border-bottom: 1px solid var(--color-border-subtle);"
+    >
+      <div>
+        <div
+          class="label-caps"
+        >
+          Test
+        </div>
+      </div>
+      <div />
+    </div>
+    <div
+      style="padding: var(--space-3);"
+    >
+      A
+    </div>
+  </div>
+</div>
+`;
+
+exports[`primitives > Sparkline renders 1`] = `
+<div>
+  <svg
+    height="24"
+    width="80"
+  >
+    <polyline
+      fill="none"
+      points="0,24 26.666666666666664,12 53.33333333333333,24 80,0"
+      stroke="var(--color-positive)"
+      stroke-width="1.5"
+    />
+  </svg>
+</div>
+`;
+
+exports[`primitives > StatusBadge renders 1`] = `
+<div>
+  <span
+    class="label-caps"
+    style="color: var(--color-positive); background: var(--color-positive-dim); border: 1px solid var(--color-border-subtle); padding: 2px 6px;"
+  >
+    OK
+  </span>
+</div>
+`;

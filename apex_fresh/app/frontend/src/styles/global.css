@@ -1,0 +1,14 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+* {
+  box-sizing: border-box;
+}
+

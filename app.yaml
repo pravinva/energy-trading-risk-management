@@ -1,0 +1,21 @@
+command:
+  - uvicorn
+  - app.backend.app:app
+  - --host
+  - 0.0.0.0
+  - --port
+  - '8000'
+
+env:
+  - name: DATABRICKS_WORKSPACE_URL
+    valueFrom: secret://DATABRICKS_WORKSPACE_URL
+  - name: APEX_ENVIRONMENT
+    value: dev
+  - name: LAKEBASE_HOST
+    valueFrom: secret://LAKEBASE_HOST
+  - name: LAKEBASE_DATABASE
+    valueFrom: secret://LAKEBASE_DATABASE
+
+resources:
+  - name: apex-db
+    type: lakebase_database

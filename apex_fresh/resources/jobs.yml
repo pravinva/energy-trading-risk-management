@@ -1,0 +1,11 @@
+jobs:
+  apex-fresh-market-simulator:
+    name: apex-fresh-market-simulator
+    tasks:
+      - task_key: run_apex_fresh_simulators
+        spark_python_task:
+          python_file: apex_fresh/data/workflows/w03_simulators.py
+    max_concurrent_runs: 1
+    timeout_seconds: 0
+    max_retries: -1
+

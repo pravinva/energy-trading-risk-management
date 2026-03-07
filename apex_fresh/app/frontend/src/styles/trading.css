@@ -1,0 +1,4 @@
+.pnl-positive { color: var(--color-bid); font-family: var(--font-data); }
+.pnl-negative { color: var(--color-offer); font-family: var(--font-data); }
+.font-data { font-family: var(--font-data); }
+

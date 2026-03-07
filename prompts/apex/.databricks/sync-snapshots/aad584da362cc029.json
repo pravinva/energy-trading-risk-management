@@ -1,0 +1,32 @@
+{
+  "version": "v1",
+  "host": "https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com",
+  "remote_path": "/Workspace/Users/pravin.varma@databricks.com/apex-prompts",
+  "last_modified_times": {
+    "apex-w00-w01.md": "2026-03-07T01:34:37.555482735+11:00",
+    "apex-w02-w05.md": "2026-03-07T01:34:54.398094665+11:00",
+    "apex-w06-w09.md": "2026-03-07T01:35:03.811622883+11:00",
+    "apex-w10-w12.md": "2026-03-07T01:35:14.112857368+11:00",
+    "apex-w13-w15.md": "2026-03-07T01:35:21.638265403+11:00",
+    "apex-w16-w18 (1).md": "2026-03-07T01:35:37.722498371+11:00",
+    "apex-w16-w18.md": "2026-03-07T01:35:27.933014524+11:00"
+  },
+  "local_to_remote_names": {
+    "apex-w00-w01.md": "apex-w00-w01.md",
+    "apex-w02-w05.md": "apex-w02-w05.md",
+    "apex-w06-w09.md": "apex-w06-w09.md",
+    "apex-w10-w12.md": "apex-w10-w12.md",
+    "apex-w13-w15.md": "apex-w13-w15.md",
+    "apex-w16-w18 (1).md": "apex-w16-w18 (1).md",
+    "apex-w16-w18.md": "apex-w16-w18.md"
+  },
+  "remote_to_local_names": {
+    "apex-w00-w01.md": "apex-w00-w01.md",
+    "apex-w02-w05.md": "apex-w02-w05.md",
+    "apex-w06-w09.md": "apex-w06-w09.md",
+    "apex-w10-w12.md": "apex-w10-w12.md",
+    "apex-w13-w15.md": "apex-w13-w15.md",
+    "apex-w16-w18 (1).md": "apex-w16-w18 (1).md",
+    "apex-w16-w18.md": "apex-w16-w18.md"
+  }
+}

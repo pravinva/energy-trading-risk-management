@@ -1,0 +1,20 @@
+bundle:
+  name: nexus-energy-trading-app
+
+workspace:
+  host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+  prod:
+    workspace:
+      host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+
+resources:
+  apps:
+    nexus_energy_trading_app:
+      name: nexus-energy-trading-app
+      source_code_path: .

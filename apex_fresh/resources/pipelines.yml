@@ -1,0 +1,12 @@
+pipelines:
+  apex_fresh_etrm_ingestion:
+    name: apex-fresh-etrm-ingestion
+    target: apex_fresh
+    catalog: apex_fresh
+    libraries:
+      - notebook:
+          path: /Workspace/apex_fresh/app/pipelines/etrm_ingestion
+    continuous: true
+    channel: CURRENT
+    development: true
+

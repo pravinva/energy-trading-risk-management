@@ -1,0 +1,16 @@
+:root {
+  --color-bg-base: #1b1f23;
+  --color-bg-panel: #1f2429;
+  --color-text-primary: #e2e8f0;
+  --color-text-secondary: #8896aa;
+  --color-border-default: #343c47;
+  --color-accent: #ff6b6b;
+  --color-bid: #34d399;
+  --color-offer: #ff6b6b;
+  --color-market-nem: #60a5fa;
+  --color-market-epex: #a78bfa;
+  --color-market-ercot: #fbbf24;
+  --font-ui: "Inter", -apple-system, sans-serif;
+  --font-data: "JetBrains Mono", monospace;
+}
+

@@ -1,0 +1,18 @@
+bundle:
+  name: apex-fresh-energy-app
+
+workspace:
+  host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+
+resources:
+  apps:
+    apex_fresh_energy_app:
+      name: apex-fresh-energy-app
+      source_code_path: .
+

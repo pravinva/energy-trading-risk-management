@@ -1,0 +1,22 @@
+DELETE FROM serverless_sandbox_tladem_catalog.nexus_anz.generation_portfolio;
+INSERT INTO serverless_sandbox_tladem_catalog.nexus_anz.generation_portfolio VALUES
+('COLLIE_1','Collie Unit 1','Coal','NSW',660,3500,'AGL','NSW1'),
+('BAYSWATER_1','Bayswater Unit 1','Coal','NSW',660,4200,'AGL','NSW2'),
+('YALLOURN_1','Yallourn Unit 1','Coal','VIC',370,2100,'EnergyAustralia','VIC1'),
+('LOYA_YA_1','Loy Yang A1','Coal','VIC',500,2800,'AGL','VIC2'),
+('TALLAWARRA','Tallawarra','Gas','NSW',435,1200,'EnergyAustralia','NSW3'),
+('TARONG','Tarong','Gas','QLD',300,800,'Stanwell','QLD1'),
+('SWANBANK','Swanbank','Gas','QLD',385,950,'CleanCo','QLD2'),
+('PEAKER_SA1','SA Peaker 1','Gas','SA',180,430,'AGL','SA1'),
+('PEAKER_SA2','SA Peaker 2','Gas','SA',220,500,'Origin','SA2'),
+('MORTLAKE','Mortlake','Gas','VIC',566,1300,'Origin','VIC3'),
+('SOLAR_Q1','Darling Downs Solar','Solar','QLD',200,520,'Neoen','QLD3'),
+('SOLAR_Q2','Western Downs Solar','Solar','QLD',400,900,'Neoen','QLD4'),
+('SOLAR_N1','New England Solar','Solar','NSW',250,620,'ACEN','NSW4'),
+('SOLAR_N2','Riverina Solar','Solar','NSW',180,420,'Edify','NSW5'),
+('SOLAR_S1','Tailem Bend Solar','Solar','SA',150,380,'Vena','SA3'),
+('WIND_S1','Hornsdale Wind','Wind','SA',315,980,'Neoen','SA4'),
+('WIND_V1','Moorabool Wind','Wind','VIC',300,850,'Goldwind','VIC4'),
+('WIND_V2','Macarthur Wind','Wind','VIC',420,1200,'AGL','VIC5'),
+('HYDRO_1','Snowy Tumut 3','Hydro','NSW',1800,4500,'Snowy Hydro','NSW6'),
+('HYDRO_2','Snowy Guthega','Hydro','NSW',60,200,'Snowy Hydro','NSW7');
