@@ -1,9 +1,8 @@
 from datetime import date, datetime
 import logging
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from app.backend.data_store import anz_fcas_summary, anz_fleet, anz_price_history, anz_prices_current, anz_revenue, anz_spikes, anz_telemetry
 from app.backend.database import execute_sql
 from app.backend.models import APIResponse
 from app.backend.sql_loader import load_sql
@@ -100,13 +99,11 @@ async def prices_current() -> APIResponse[list[RegionCurrentPrice]]:
     sql = load_sql('data/queries/anz/rrp_current.sql')
     try:
         rows = await execute_sql(sql)
-        parsed = []
-        for r in rows:
-            rrp = float(r.get('rrp', 0))
-            parsed.append(RegionCurrentPrice(region_id=str(r.get('region_id', 'NA')), rrp=rrp, change_vs_prev=0.0, pct_change=0.0, is_spike=rrp > 1000))
-        return APIResponse(data=parsed, region='ANZ')
-    except Exception:
-        return APIResponse(data=[RegionCurrentPrice.model_validate(r) for r in anz_prices_current()], region='ANZ')
+    except Exception as exc:
+        logger.exception('ANZ current prices SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ current prices query failed: {exc}') from exc
+    parsed = [RegionCurrentPrice.model_validate(r) for r in rows]
+    return APIResponse(data=parsed, region='ANZ')
 
 
 @router.get('/prices/history', response_model=APIResponse[list[DispatchInterval]])
@@ -114,23 +111,43 @@ async def prices_history(hours: int = Query(default=24, ge=1, le=168), region_id
     sql = _safe_sql(load_sql('data/queries/anz/rrp_by_region.sql'), hours=hours, region_id=region_id)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            return APIResponse(data=[DispatchInterval.model_validate(r) for r in rows], region='ANZ')
     except Exception as exc:
-        logger.warning('Falling back to in-memory ANZ history data: %s', exc)
-    return APIResponse(data=[DispatchInterval.model_validate(r) for r in anz_price_history(hours=hours, region_id=region_id)], region='ANZ')
+        logger.exception('ANZ price history SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ price history query failed: {exc}') from exc
+    return APIResponse(data=[DispatchInterval.model_validate(r) for r in rows], region='ANZ')
 
 
 @router.get('/bess/fleet', response_model=APIResponse[BESSFleetSummary])
 async def bess_fleet() -> APIResponse[BESSFleetSummary]:
-    assets = [BESSAsset.model_validate(r) for r in anz_fleet()]
+    try:
+        rows = await execute_sql(load_sql('data/queries/anz/bess_fleet_summary.sql'))
+    except Exception as exc:
+        logger.exception('ANZ BESS fleet SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ BESS fleet query failed: {exc}') from exc
+    assets = [BESSAsset.model_validate(r) for r in rows]
+    try:
+        fcas_rows = await execute_sql(
+            """
+            WITH latest AS (
+              SELECT duid, fcas_raise_mw, fcas_lower_mw,
+                     ROW_NUMBER() OVER (PARTITION BY duid ORDER BY recorded_at DESC) AS rn
+              FROM serverless_sandbox_tladem_catalog.nexus_anz.bess_telemetry
+            )
+            SELECT COALESCE(SUM((fcas_raise_mw + fcas_lower_mw) / 2.0), 0) AS fleet_fcas_mw
+            FROM latest WHERE rn = 1
+            """
+        )
+    except Exception as exc:
+        logger.exception('ANZ fleet FCAS aggregation SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ fleet FCAS query failed: {exc}') from exc
+    fleet_fcas = float(fcas_rows[0].get("fleet_fcas_mw", 0)) if fcas_rows else 0.0
     return APIResponse(
         data=BESSFleetSummary(
             assets=assets,
             total_fleet_mw=sum(a.capacity_mw for a in assets),
             total_fleet_charging_mw=sum(abs(a.current_output_mw) for a in assets if a.current_output_mw < 0),
             total_fleet_discharging_mw=sum(a.current_output_mw for a in assets if a.current_output_mw > 0),
-            fleet_fcas_mw=sum(a.capacity_mw * 0.1 for a in assets),
+            fleet_fcas_mw=round(fleet_fcas, 2),
         ),
         region='ANZ',
     )
@@ -141,11 +158,10 @@ async def bess_telemetry(duid: str, hours: int = Query(default=24, ge=1, le=168)
     sql = _safe_sql(load_sql('data/queries/anz/bess_telemetry_timeseries.sql'), duid=duid, hours=hours)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            return APIResponse(data=[TelemetryPoint.model_validate(r) for r in rows], region='ANZ')
     except Exception as exc:
-        logger.warning('Falling back to in-memory ANZ telemetry data: %s', exc)
-    return APIResponse(data=[TelemetryPoint.model_validate(r) for r in anz_telemetry(duid=duid, hours=hours)], region='ANZ')
+        logger.exception('ANZ telemetry SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ telemetry query failed: {exc}') from exc
+    return APIResponse(data=[TelemetryPoint.model_validate(r) for r in rows], region='ANZ')
 
 
 @router.get('/bess/{duid}/revenue', response_model=APIResponse[list[RevenueDay]])
@@ -153,16 +169,15 @@ async def bess_revenue(duid: str, days: int = Query(default=30, ge=1, le=365)) -
     sql = _safe_sql(load_sql('data/queries/anz/revenue_attribution.sql'), duid=duid, days=days)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            mapped = []
-            for r in rows:
-                energy = float(r.get('energy_revenue', 0))
-                fcas = float(r.get('fcas_total_revenue', r.get('fcas_raise5min_revenue', 0)))
-                mapped.append(RevenueDay(settlement_date=r.get('settlement_date'), energy_revenue=energy, fcas_total_revenue=fcas, total_revenue=float(r.get('total_revenue', energy + fcas))))
-            return APIResponse(data=mapped, region='ANZ')
     except Exception as exc:
-        logger.warning('Falling back to in-memory ANZ revenue data: %s', exc)
-    return APIResponse(data=[RevenueDay.model_validate(r) for r in anz_revenue(duid=duid, days=days)], region='ANZ')
+        logger.exception('ANZ revenue SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ revenue query failed: {exc}') from exc
+    mapped = []
+    for r in rows:
+        energy = float(r.get('energy_revenue', 0))
+        fcas = float(r.get('fcas_total_revenue', r.get('fcas_raise5min_revenue', 0)))
+        mapped.append(RevenueDay(settlement_date=r.get('settlement_date'), energy_revenue=energy, fcas_total_revenue=fcas, total_revenue=float(r.get('total_revenue', energy + fcas))))
+    return APIResponse(data=mapped, region='ANZ')
 
 
 @router.get('/fcas/summary', response_model=APIResponse[list[FCASMarketState]])
@@ -170,14 +185,18 @@ async def fcas_summary() -> APIResponse[list[FCASMarketState]]:
     sql = load_sql('data/queries/anz/fcas_market_summary.sql')
     try:
         rows = await execute_sql(sql)
-        if rows:
-            return APIResponse(data=[FCASMarketState.model_validate(r) for r in rows], region='ANZ')
     except Exception as exc:
-        logger.warning('Falling back to in-memory ANZ FCAS data: %s', exc)
-    return APIResponse(data=[FCASMarketState.model_validate(r) for r in anz_fcas_summary()], region='ANZ')
+        logger.exception('ANZ FCAS summary SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ FCAS summary query failed: {exc}') from exc
+    return APIResponse(data=[FCASMarketState.model_validate(r) for r in rows], region='ANZ')
 
 
 @router.get('/spikes', response_model=APIResponse[list[SpikeEvent]])
 async def spikes(days: int = Query(default=90, ge=1, le=365)) -> APIResponse[list[SpikeEvent]]:
-    _ = load_sql('data/queries/anz/spike_events.sql')
-    return APIResponse(data=[SpikeEvent.model_validate(r) for r in anz_spikes(days=days)], region='ANZ')
+    sql = load_sql('data/queries/anz/spike_events.sql').replace("interval 90 days", f"interval {days} days")
+    try:
+        rows = await execute_sql(sql)
+    except Exception as exc:
+        logger.exception('ANZ spikes SQL failed')
+        raise HTTPException(status_code=503, detail=f'ANZ spikes query failed: {exc}') from exc
+    return APIResponse(data=[SpikeEvent.model_validate(r) for r in rows], region='ANZ')

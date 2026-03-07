@@ -1,9 +1,8 @@
 from datetime import date, datetime
 import logging
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
-from app.backend.data_store import europe_assets, europe_audit, europe_flows, europe_history, europe_mix, europe_prices_current, europe_spreads
 from app.backend.database import execute_sql
 from app.backend.models import APIResponse
 from app.backend.sql_loader import load_sql
@@ -80,12 +79,11 @@ async def prices_current() -> APIResponse[list[EPEXPrice]]:
     sql = load_sql('data/queries/europe/epex_current_prices.sql')
     try:
         rows = await execute_sql(sql)
-        if rows:
-            out = [EPEXPrice.model_validate({'bidding_zone': r.get('bidding_zone'), 'delivery_datetime': r.get('delivery_datetime'), 'price_eur_mwh': float(r.get('price_eur_mwh', 0)), 'volume_mwh': float(r.get('volume_mwh', 0)), 'mtu_minutes': int(r.get('market_time_unit_minutes', r.get('mtu_minutes', 60))), 'is_negative': float(r.get('price_eur_mwh', 0)) < 0}) for r in rows]
-            return APIResponse(data=out, region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe current prices: %s', exc)
-    return APIResponse(data=[EPEXPrice.model_validate(r) for r in europe_prices_current()], region='EUR')
+        logger.exception('Europe current prices SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe current prices query failed: {exc}') from exc
+    out = [EPEXPrice.model_validate({'bidding_zone': r.get('bidding_zone'), 'delivery_datetime': r.get('delivery_datetime'), 'price_eur_mwh': float(r.get('price_eur_mwh', 0)), 'volume_mwh': float(r.get('volume_mwh', 0)), 'mtu_minutes': int(r.get('market_time_unit_minutes', r.get('mtu_minutes', 60))), 'is_negative': float(r.get('price_eur_mwh', 0)) < 0}) for r in rows]
+    return APIResponse(data=out, region='EUR')
 
 
 @router.get('/prices/history', response_model=APIResponse[list[EPEXPrice]])
@@ -93,12 +91,11 @@ async def prices_history(bidding_zone: str | None = None, hours: int = Query(def
     sql = _safe_sql(load_sql('data/queries/europe/epex_price_history.sql'), bidding_zone=bidding_zone or 'NULL', hours=hours)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            out = [EPEXPrice.model_validate({'bidding_zone': r.get('bidding_zone'), 'delivery_datetime': r.get('delivery_datetime'), 'price_eur_mwh': float(r.get('price_eur_mwh', 0)), 'volume_mwh': float(r.get('volume_mwh', 0)), 'mtu_minutes': int(r.get('market_time_unit_minutes', r.get('mtu_minutes', 60))), 'is_negative': float(r.get('price_eur_mwh', 0)) < 0}) for r in rows]
-            return APIResponse(data=out, region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe price history: %s', exc)
-    return APIResponse(data=[EPEXPrice.model_validate(r) for r in europe_history(zone=bidding_zone, hours=hours)], region='EUR')
+        logger.exception('Europe price history SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe price history query failed: {exc}') from exc
+    out = [EPEXPrice.model_validate({'bidding_zone': r.get('bidding_zone'), 'delivery_datetime': r.get('delivery_datetime'), 'price_eur_mwh': float(r.get('price_eur_mwh', 0)), 'volume_mwh': float(r.get('volume_mwh', 0)), 'mtu_minutes': int(r.get('market_time_unit_minutes', r.get('mtu_minutes', 60))), 'is_negative': float(r.get('price_eur_mwh', 0)) < 0}) for r in rows]
+    return APIResponse(data=out, region='EUR')
 
 
 @router.get('/generation/mix', response_model=APIResponse[list[GenerationMixItem]])
@@ -106,13 +103,12 @@ async def generation_mix(bidding_zone: str = 'DE-LU') -> APIResponse[list[Genera
     sql = _safe_sql(load_sql('data/queries/europe/generation_mix.sql'), bidding_zone=bidding_zone)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            total = sum(float(r.get('generation_mw', 0)) for r in rows) or 1.0
-            out = [GenerationMixItem(fuel_type=str(r.get('fuel_type')), generation_mw=float(r.get('generation_mw', 0)), pct_of_total=round(float(r.get('generation_mw', 0)) / total * 100, 2)) for r in rows]
-            return APIResponse(data=out, region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe generation mix: %s', exc)
-    return APIResponse(data=[GenerationMixItem.model_validate(r) for r in europe_mix(zone=bidding_zone)], region='EUR')
+        logger.exception('Europe generation mix SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe generation mix query failed: {exc}') from exc
+    total = sum(float(r.get('generation_mw', 0)) for r in rows) or 1.0
+    out = [GenerationMixItem(fuel_type=str(r.get('fuel_type')), generation_mw=float(r.get('generation_mw', 0)), pct_of_total=round(float(r.get('generation_mw', 0)) / total * 100, 2)) for r in rows]
+    return APIResponse(data=out, region='EUR')
 
 
 @router.get('/spreads/spark', response_model=APIResponse[list[SparkSpreadPoint]])
@@ -120,11 +116,10 @@ async def spark_spreads(bidding_zone: str = 'DE-LU') -> APIResponse[list[SparkSp
     sql = _safe_sql(load_sql('data/queries/europe/spark_spread_history.sql'), bidding_zone=bidding_zone)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            return APIResponse(data=[SparkSpreadPoint.model_validate(r) for r in rows], region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe spark spreads: %s', exc)
-    return APIResponse(data=[SparkSpreadPoint.model_validate(r) for r in europe_spreads(zone=bidding_zone)], region='EUR')
+        logger.exception('Europe spark spreads SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe spark spreads query failed: {exc}') from exc
+    return APIResponse(data=[SparkSpreadPoint.model_validate(r) for r in rows], region='EUR')
 
 
 @router.get('/assets/openlink-incumbent', response_model=APIResponse[list[GenerationAsset]])
@@ -132,11 +127,10 @@ async def openlink_assets() -> APIResponse[list[GenerationAsset]]:
     sql = load_sql('data/queries/europe/openlink_displacement_summary.sql')
     try:
         rows = await execute_sql(sql)
-        if rows:
-            return APIResponse(data=[GenerationAsset.model_validate(r) for r in rows], region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe openlink assets: %s', exc)
-    return APIResponse(data=[GenerationAsset.model_validate(r) for r in europe_assets() if r['openlink_incumbent']], region='EUR')
+        logger.exception('Europe openlink assets SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe openlink assets query failed: {exc}') from exc
+    return APIResponse(data=[GenerationAsset.model_validate(r) for r in rows], region='EUR')
 
 
 @router.get('/flows/cross-border', response_model=APIResponse[list[CrossBorderFlow]])
@@ -144,12 +138,11 @@ async def cross_border() -> APIResponse[list[CrossBorderFlow]]:
     sql = load_sql('data/queries/europe/cross_border_utilisation.sql')
     try:
         rows = await execute_sql(sql)
-        if rows:
-            out = [CrossBorderFlow(from_zone=str(r.get('from_zone')), to_zone=str(r.get('to_zone')), flow_mw=float(r.get('flow_mw', 0)), atc_mw=float(r.get('atc_mw', 0)), utilisation_pct=float(r.get('utilisation_pct', 0)), is_constrained=float(r.get('utilisation_pct', 0)) > 90) for r in rows]
-            return APIResponse(data=out, region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe cross-border flows: %s', exc)
-    return APIResponse(data=[CrossBorderFlow.model_validate(r) for r in europe_flows()], region='EUR')
+        logger.exception('Europe cross-border flow SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe cross-border flow query failed: {exc}') from exc
+    out = [CrossBorderFlow(from_zone=str(r.get('from_zone')), to_zone=str(r.get('to_zone')), flow_mw=float(r.get('flow_mw', 0)), atc_mw=float(r.get('atc_mw', 0)), utilisation_pct=float(r.get('utilisation_pct', 0)), is_constrained=float(r.get('utilisation_pct', 0)) > 90) for r in rows]
+    return APIResponse(data=out, region='EUR')
 
 
 @router.get('/audit/remit', response_model=APIResponse[list[AuditRecord]])
@@ -158,9 +151,8 @@ async def remit_audit(bidding_zone: str = 'DE-LU', audit_date: date | None = Non
     sql = _safe_sql(load_sql('data/queries/europe/remit_audit_example.sql'), bidding_zone=bidding_zone, audit_date=date_val)
     try:
         rows = await execute_sql(sql)
-        if rows:
-            out = [AuditRecord(delivery_datetime=r.get('delivery_datetime'), bidding_zone=str(r.get('bidding_zone')), price_eur_mwh=float(r.get('price_eur_mwh', 0)), data_source=str(r.get('data_source', 'SIMULATED')), recorded_at=r.get('recorded_at') or r.get('delivery_datetime')) for r in rows]
-            return APIResponse(data=out, region='EUR')
     except Exception as exc:
-        logger.warning('Falling back to in-memory Europe REMIT audit data: %s', exc)
-    return APIResponse(data=[AuditRecord.model_validate(r) for r in europe_audit(zone=bidding_zone, audit_date=date_val)], region='EUR')
+        logger.exception('Europe REMIT audit SQL failed')
+        raise HTTPException(status_code=503, detail=f'Europe REMIT audit query failed: {exc}') from exc
+    out = [AuditRecord(delivery_datetime=r.get('delivery_datetime'), bidding_zone=str(r.get('bidding_zone')), price_eur_mwh=float(r.get('price_eur_mwh', 0)), data_source=str(r.get('data_source', 'SIMULATED')), recorded_at=r.get('recorded_at') or r.get('delivery_datetime')) for r in rows]
+    return APIResponse(data=out, region='EUR')

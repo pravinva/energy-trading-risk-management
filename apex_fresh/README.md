@@ -29,3 +29,23 @@ python -m apex_fresh.scripts.run_w04_w05_w03
 ```
 
 The runner will fail fast if order is violated.
+
+## Backup and Restore (Workspace Loss Protection)
+
+To snapshot all core `apex_fresh` tables to durable parquet paths and save a manifest:
+
+```bash
+python3 -m apex_fresh.scripts.backup_uc_tables \
+  --catalog apex_fresh \
+  --backup-root dbfs:/tmp/apex_fresh_backups \
+  --manifest-path apex_fresh/backups/latest_manifest.json
+```
+
+To restore from the manifest into a catalog:
+
+```bash
+python3 -m apex_fresh.scripts.restore_uc_tables \
+  --manifest-path apex_fresh/backups/latest_manifest.json \
+  --target-catalog apex_fresh \
+  --if-exists replace
+```
