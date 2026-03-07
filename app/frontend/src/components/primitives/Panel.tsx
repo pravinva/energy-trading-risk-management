@@ -15,18 +15,18 @@ const personaColor: Record<Persona, string> = {
 
 export function Panel({ title, subtitle, actions, persona = 'neutral', badge, className, children }: { title?: string; subtitle?: string; actions?: ReactNode; persona?: Persona; badge?: string; className?: string; children: ReactNode }): JSX.Element {
   return (
-    <div className={className} style={{ background: 'var(--color-bg-base)', border: '1px solid var(--color-border-subtle)', borderLeft: `2px solid ${personaColor[persona]}`, borderRadius: 'var(--radius-none)' }}>
+    <div className={className} style={{ background: 'var(--color-bg-panel)', border: '1px solid var(--color-border-subtle)', borderRadius: '5px', overflow: 'hidden' }}>
       {(title || actions) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-bg-elevated)', padding: 'var(--space-3)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-bg-surface)', padding: '8px 12px', borderBottom: '1px solid var(--color-border-subtle)' }}>
           <div>
-            <div className="label-caps">{title ?? ''}</div>
-            {subtitle ? <div className="text-secondary" style={{ fontSize: 'var(--text-xs)', marginTop: 2 }}>{subtitle}</div> : null}
+            <div className="label-caps" style={{ fontSize: 10, letterSpacing: '0.08em' }}>{title ?? ''}</div>
+            {subtitle ? <div className="text-secondary" style={{ fontSize: 11, marginTop: 2 }}>{subtitle}</div> : null}
           </div>
-          {badge ? <div className="label-caps" style={{ color: personaColor[persona] }}>{badge}</div> : null}
+          {badge ? <div className="label-caps" style={{ color: personaColor[persona], fontSize: 10 }}>{badge}</div> : null}
           <div>{actions}</div>
         </div>
       )}
-      <div style={{ padding: 'var(--space-3)' }}>{children}</div>
+      <div style={{ padding: 12 }}>{children}</div>
     </div>
   );
 }

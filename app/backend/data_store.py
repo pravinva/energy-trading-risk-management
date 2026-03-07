@@ -112,7 +112,7 @@ def europe_spreads(zone: str) -> list[dict[str, object]]:
 def europe_assets() -> list[dict[str, object]]:
     out = []
     for i in range(25):
-        out.append({'asset_id': f'EU_ASSET_{i+1:03d}', 'asset_name': f'Generation Asset {i+1}', 'operator': random.choice(['EDF', 'Engie', 'RWE', 'Iberdrola']), 'country': random.choice(['DE', 'FR', 'BE', 'NL', 'ES', 'NO']), 'fuel_type': random.choice(['Gas', 'Nuclear', 'Wind', 'Solar', 'Hydro', 'Coal']), 'capacity_mw': round(random.uniform(120, 1600), 2), 'openlink_incumbent': i < 6})
+        out.append({'asset_id': f'EU_ASSET_{i+1:03d}', 'asset_name': f'Generation Asset {i+1}', 'operator': random.choice(['EDF', 'RWE', 'Equinor']), 'country': random.choice(['DE', 'FR', 'BE', 'NL', 'ES', 'NO']), 'fuel_type': random.choice(['Gas', 'Nuclear', 'Wind', 'Solar', 'Hydro']), 'capacity_mw': round(random.uniform(120, 1600), 2), 'openlink_incumbent': i < 6})
     return out
 
 

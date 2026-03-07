@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import time
 
 import httpx
+from databricks.sdk import WorkspaceClient
 
 from app.backend.config import get_settings
 
@@ -39,11 +40,21 @@ async def get_db():
 
 async def _execute_statement(statement: str) -> QueryResult:
     settings = get_settings()
-    host = settings.databricks_host.rstrip('/')
+    host = settings.databricks_host.strip()
+    if host and not host.startswith('http'):
+        host = f'https://{host}'
+    host = host.rstrip('/')
     token = __import__('os').environ.get('DATABRICKS_TOKEN', '')
     warehouse_id = __import__('os').environ.get('DATABRICKS_SQL_WAREHOUSE_ID', 'a62624c51dced859')
+    if not token:
+        # In Databricks Apps, workload identity credentials can be used directly via SDK auth.
+        client = WorkspaceClient()
+        auth_headers = client.config.authenticate()
+        bearer = auth_headers.get('Authorization', '')
+        if bearer.startswith('Bearer '):
+            token = bearer[7:]
     if not host or not token:
-        raise RuntimeError('Live SQL auth not configured')
+        raise RuntimeError('Live SQL auth not configured (host/token)')
 
     headers = {'Authorization': f'Bearer {token}'}
     payload = {

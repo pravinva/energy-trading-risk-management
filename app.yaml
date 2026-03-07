@@ -7,6 +7,10 @@ command:
   - '8000'
 
 env:
+  - name: DATABRICKS_SQL_WAREHOUSE_ID
+    value: a62624c51dced859
+  - name: APEX_CATALOG
+    value: apex_fresh
   - name: DATABRICKS_WORKSPACE_URL
     valueFrom: secret://DATABRICKS_WORKSPACE_URL
   - name: APEX_ENVIRONMENT

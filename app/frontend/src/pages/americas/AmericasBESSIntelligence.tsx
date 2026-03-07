@@ -6,7 +6,7 @@ import { useERCOTRTCBComparison } from '@/api/hooks/americas';
 import { DataTable, Panel, StatusBadge } from '@/components/primitives';
 
 const helper = createColumnHelper<Record<string, any>>();
-const assets = ['ERCOT_BESS_001', 'ERCOT_BESS_002', 'ERCOT_BESS_003', 'ERCOT_BESS_004', 'ERCOT_BESS_005', 'ERCOT_BESS_006', 'ERCOT_BESS_007', 'ERCOT_BESS_008', 'ERCOT_BESS_009', 'ERCOT_BESS_010'];
+const assets = ['TX_WEST_1', 'TX_WEST_2', 'TX_HOUSTON_1', 'TX_NORTH_1'];
 
 export function AmericasBESSIntelligence(): JSX.Element {
   const [asset, setAsset] = useState(assets[0]);

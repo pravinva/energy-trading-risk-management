@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     lakebase_port: int = 5432
     nexus_environment: Literal['dev', 'prod'] = 'dev'
     apex_environment: Literal['dev', 'prod'] = 'dev'
+    apex_catalog: str = 'apex_fresh'
     app_version: str = '1.0.0'
     cors_origins: list[str] = ['http://localhost:5173']
     nexus_dev_user_email: str | None = None

@@ -9,3 +9,13 @@ jobs:
     timeout_seconds: 0
     max_retries: -1
 
+  apex-fresh-model-training:
+    name: apex-fresh-model-training
+    tasks:
+      - task_key: train_market_models
+        spark_python_task:
+          python_file: apex_fresh/resources/notebooks/train_market_models.py
+    max_concurrent_runs: 1
+    timeout_seconds: 0
+    max_retries: 1
+
