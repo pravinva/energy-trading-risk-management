@@ -32,7 +32,7 @@ export function StressTesting(): JSX.Element {
       <Panel persona="risk" title="Stress Testing" subtitle="Scenario-based risk impact using VaR engine">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
           <input className="mono-price" value={spotPrice} onChange={(e) => setSpotPrice(Number(e.target.value))} />
-          <button onClick={() => setSubmittedSpot(spotPrice)} disabled={runset.isFetching}>{runset.isFetching ? 'Running...' : 'Run Stress Set'}</button>
+          <button onClick={() => setSubmittedSpot(spotPrice)} disabled={runset.isFetching}>{runset.isFetching ? 'Refreshing...' : 'Refresh Stress Set'}</button>
         </div>
       </Panel>
       <Panel persona="risk" title="Scenario Results">

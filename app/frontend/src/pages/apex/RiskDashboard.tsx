@@ -81,7 +81,7 @@ export function RiskDashboard(): JSX.Element {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <Panel
           persona="risk"
-          title="Run VaR Calculation"
+          title="VaR Analysis"
           subtitle={forecastMeta.data ? `Forecast source: ${forecastMeta.data.model_name} (${forecastMeta.data.points_available} points)` : 'Forecast source loading'}
         >
           <div
@@ -107,7 +107,7 @@ export function RiskDashboard(): JSX.Element {
                 <option key={name}>{name}</option>
               ))}
             </select>
-            <button onClick={() => varCalc.mutate({ confidence: 0.95, spot_price: spotPrice, volatility })}>Run VaR</button>
+            <button onClick={() => varCalc.mutate({ confidence: 0.95, spot_price: spotPrice, volatility })}>Refresh VaR</button>
           </div>
           <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
             <div className="font-data">Exposure: {varCalc.data?.exposure_mw?.toFixed(2) ?? '--'}</div>
@@ -136,7 +136,6 @@ export function RiskDashboard(): JSX.Element {
                   <div style={{ fontWeight: 600 }}>{scenario.scenario}</div>
                   <div className="font-data" style={{ color: scenario.shock.startsWith('-') ? 'var(--color-positive)' : 'var(--color-negative)' }}>{scenario.shock}</div>
                   <div className="font-data">Impact {scenario.impact.toFixed(2)}</div>
-                  <button style={{ width: '100%', marginTop: 6 }}>Run</button>
                 </div>
               ))}
             </div>

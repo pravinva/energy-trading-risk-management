@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { useCurrentPrices, useMarketPnlDaily, useMarketSummary } from '@/api/hooks/apex';
+import { useUserContext } from '@/api/hooks/useUserContext';
 import { useTradingStore } from '@/store/tradingStore';
 
 const riskItemsPrimary = [
@@ -12,16 +13,16 @@ const riskItemsPrimary = [
 
 const navByPersona = {
   dispatch: {
-    sectionA: 'Dispatch',
-    itemsA: [{ to: '/workspace/dispatch', label: 'Console' }, { to: '/workspace/dispatch', label: 'Fleet Overview' }],
-    sectionB: 'Assets',
-    itemsB: [{ to: '/workspace/dispatch', label: 'Fleet' }, { to: '/workspace/dispatch', label: 'Stack History' }],
+    sectionA: 'Analytics',
+    itemsA: [{ to: '/workspace/dispatch', label: 'Fleet Monitor' }, { to: '/workspace/dispatch', label: 'Stack Analytics' }],
+    sectionB: 'Models',
+    itemsB: [{ to: '/workspace/dispatch', label: 'Recommendation Insights' }, { to: '/workspace/dispatch', label: 'History' }],
   },
   trader: {
     sectionA: 'Analytics',
-    itemsA: [{ to: '/workspace/trading', label: 'Overview' }, { to: '/workspace/trading', label: 'Position Book' }, { to: '/workspace/trading', label: 'Trade Blotter' }],
+    itemsA: [{ to: '/workspace/trading', label: 'Flow Summary' }, { to: '/workspace/trading', label: 'Position Exposure' }, { to: '/workspace/trading', label: 'Flow Tape' }],
     sectionB: 'Views',
-    itemsB: [{ to: '/workspace/trading', label: 'By Region' }, { to: '/workspace/trading', label: 'P&L Attribution' }],
+    itemsB: [{ to: '/workspace/trading', label: 'By Region' }, { to: '/workspace/trading', label: 'Risk Heatmap' }],
   },
   risk: {
     sectionA: 'Risk',
@@ -43,15 +44,9 @@ const navByPersona = {
   },
 };
 
-const marketLabel = {
-  NEM: 'ANZ',
-  EPEX: 'EU',
-  ERCOT: 'US',
-} as const;
-
 const personaLabel = {
-  dispatch: 'Dispatch Operator',
-  trader: 'Power Trader',
+  dispatch: 'Dispatch Analyst',
+  trader: 'Trading Analyst',
   risk: 'Risk Manager',
   quant: 'Quant Developer',
   portfolio: 'Portfolio Manager',
@@ -68,6 +63,7 @@ export function ApexWorkspaceLayout(): JSX.Element {
   const sessionPnl = useTradingStore((s) => s.sessionPnl);
   const setSessionPnl = useTradingStore((s) => s.setSessionPnl);
   const pnlDaily = useMarketPnlDaily(market);
+  const user = useUserContext();
 
   useEffect(() => {
     if (typeof pnlDaily.data?.pnl_daily === 'number') {
@@ -89,8 +85,10 @@ export function ApexWorkspaceLayout(): JSX.Element {
     }
   }, [location.pathname, setPersona]);
 
-  const tickerRows = (prices.data ?? []).filter((row) => row.market === marketLabel[market]).slice(0, 4);
+  const tickerRows = (prices.data ?? []).filter((row) => row.market === market).slice(0, 4);
   const navConfig = navByPersona[persona];
+  const email = (user.data as { data?: { email?: string } } | undefined)?.data?.email ?? '';
+  const userLabel = email ? email.split('@')[0] : 'workspace-user';
 
   return (
     <div className="page-shell">
@@ -118,7 +116,7 @@ export function ApexWorkspaceLayout(): JSX.Element {
             AVG <span style={{ color: 'var(--color-text-primary)' }}>${summary.data?.average_price?.toFixed(2) ?? '--'}</span>
           </div>
           <span className="font-data" style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{new Date().toLocaleTimeString()}</span>
-          <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>Alex Thompson</span>
+          <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-text-secondary)' }}>{userLabel}</span>
         </div>
       </header>
       <div className="workspace">

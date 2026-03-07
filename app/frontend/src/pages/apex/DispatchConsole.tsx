@@ -1,33 +1,30 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { DataTable, Panel } from '@/components/primitives';
-import { OfferBand } from '@/components/trading';
-import { useAcceptDispatchRecommendation, useDispatchAssets, useDispatchRecommendation, useDispatchServiceTypes, useDispatchStackHistory, useForecastMetadata, useLatestOfferStack, useMarketSummary, useModelLineage, usePredispatch, useSubmitOfferStack } from '@/api/hooks/apex';
+import { useDispatchAssets, useDispatchRecommendation, useDispatchServiceTypes, useDispatchStackHistory, useForecastMetadata, useLatestOfferStack, useMarketSummary, useModelLineage, usePredispatch } from '@/api/hooks/apex';
 import { useDispatchStore } from '@/store/dispatchStore';
 import { useTradingStore } from '@/store/tradingStore';
 
 export function DispatchConsole(): JSX.Element {
-  const { assetId, scenario, serviceType, bands, setBand, setBands, resetBands, setAssetId, setServiceType } = useDispatchStore();
+  const { assetId, serviceType, setBands, setAssetId, setServiceType } = useDispatchStore();
   const market = useTradingStore((s) => s.market);
   const prices = useMarketSummary();
-  const submit = useSubmitOfferStack();
   const predispatch = usePredispatch(12, market);
   const forecastMeta = useForecastMetadata(market);
   const lineage = useModelLineage(market);
   const assetsQuery = useDispatchAssets(market);
   const serviceTypesQuery = useDispatchServiceTypes(market);
   const recommendation = useDispatchRecommendation(assetId);
-  const acceptRecommendation = useAcceptDispatchRecommendation();
   const history = useDispatchStackHistory(assetId, 40);
   const latestStack = useLatestOfferStack(assetId);
-  const [selected, setSelected] = useState(0);
   const assets = (assetsQuery.data ?? []).map((r) => r.asset_id);
   const serviceTypes = (serviceTypesQuery.data ?? []).map((r) => r.service_type);
   const strip = (predispatch.data ?? []).slice(0, 12);
-  const totalVolume = useMemo(() => bands.reduce((sum, band) => sum + band.volume_mw, 0), [bands]);
+  const latestBands = latestStack.data?.bands ?? [];
+  const totalVolume = useMemo(() => latestBands.reduce((sum, band) => sum + band.volume_mw, 0), [latestBands]);
   const weighted = useMemo(() => {
-    const numerator = bands.reduce((sum, band) => sum + band.volume_mw * band.price, 0);
+    const numerator = latestBands.reduce((sum, band) => sum + band.volume_mw * band.price, 0);
     return totalVolume > 0 ? numerator / totalVolume : 0;
-  }, [bands, totalVolume]);
+  }, [latestBands, totalVolume]);
   const latestLineage = lineage.data?.[0];
 
   useEffect(() => {
@@ -41,11 +38,10 @@ export function DispatchConsole(): JSX.Element {
 
   useEffect(() => {
     const live = latestStack.data;
-    const allZero = bands.every((b) => b.price <= 0 || b.volume_mw <= 0);
-    if (live?.bands?.length && allZero) {
+    if (live?.bands?.length) {
       setBands(live.bands);
     }
-  }, [bands, latestStack.data, setBands]);
+  }, [latestStack.data, setBands]);
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '244px 1fr 240px', gap: 10, minHeight: 540 }}>
@@ -76,7 +72,7 @@ export function DispatchConsole(): JSX.Element {
         </div>
       </Panel>
 
-      <Panel persona="dispatch" title="Offer Stack Builder" subtitle={`${assetId} · ${serviceType}`}>
+      <Panel persona="dispatch" title="Offer Stack Analytics" subtitle={`${assetId} · ${serviceType}`}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
           <select value={assetId} onChange={(e) => setAssetId(e.target.value)}>
             {assets.map((asset) => <option key={asset}>{asset}</option>)}
@@ -86,18 +82,14 @@ export function DispatchConsole(): JSX.Element {
           </select>
         </div>
         <div style={{ display: 'grid', gap: 8 }}>
-          {bands.map((band, idx) => (
-            <OfferBand
-              key={band.band_index}
-              bandIndex={band.band_index}
-              price={band.price}
-              volume={band.volume_mw}
-              isSelected={selected === idx}
-              onSelect={() => setSelected(idx)}
-              onPriceChange={(value) => setBand(idx, { price: value })}
-              onVolumeChange={(value) => setBand(idx, { volume_mw: value })}
-            />
-          ))}
+          <DataTable
+            data={latestBands.map((band) => ({ band: `Band ${band.band_index}`, price: band.price, volume: band.volume_mw }))}
+            columns={[
+              { header: 'Band', accessorKey: 'band' },
+              { header: 'Price', accessorKey: 'price', meta: { kind: 'price' } },
+              { header: 'Volume', accessorKey: 'volume', meta: { kind: 'mw' } },
+            ]}
+          />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: 8 }}>
             <span className="label-caps">Total Volume</span>
             <span className="font-data">{totalVolume.toFixed(2)} MW</span>
@@ -106,28 +98,14 @@ export function DispatchConsole(): JSX.Element {
             <span className="label-caps">Weighted Price</span>
             <span className="font-data">{weighted.toFixed(2)}</span>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button style={{ flex: 1 }} disabled={!assetId || !serviceType || bands.some((b) => b.price <= 0 || b.volume_mw <= 0)} onClick={() => submit.mutate({ asset_id: assetId, scenario: `${scenario}-${serviceType}`, bands })}>Submit Stack</button>
-            <button
-              onClick={() => {
-                const live = latestStack.data;
-                if (live?.bands?.length) {
-                  setBands(live.bands);
-                }
-              }}
-            >
-              Load Rec
-            </button>
-            <button onClick={resetBands}>Clear</button>
-          </div>
         </div>
       </Panel>
 
       <div style={{ display: 'grid', gap: 10 }}>
-        <Panel persona="dispatch" title="ML Recommendations">
-          <div className="font-data">Action: {recommendation.data?.action ?? '--'}</div>
-          <div className="font-data">Target MW: {recommendation.data?.target_mw?.toFixed(2) ?? '--'}</div>
-          <div className="font-data">Confidence: {recommendation.data?.confidence?.toFixed(2) ?? '--'}</div>
+        <Panel persona="dispatch" title="ML Recommendation Insights">
+          <div className="font-data">Suggested Action: {recommendation.data?.action ?? '--'}</div>
+          <div className="font-data">Suggested Target MW: {recommendation.data?.target_mw?.toFixed(2) ?? '--'}</div>
+          <div className="font-data">Confidence Score: {recommendation.data?.confidence?.toFixed(2) ?? '--'}</div>
           <div style={{ marginTop: 8, background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: 8 }}>
             <div className="label-caps">Model Lineage</div>
             <div className="font-data" style={{ marginTop: 4 }}>
@@ -136,21 +114,6 @@ export function DispatchConsole(): JSX.Element {
                 : 'Lineage loading'}
             </div>
           </div>
-          <button
-            style={{ width: '100%', marginTop: 8 }}
-            disabled={!assetId || !recommendation.data}
-            onClick={() => {
-              if (!recommendation.data) return;
-              acceptRecommendation.mutate({
-                asset_id: assetId,
-                action: recommendation.data.action,
-                target_mw: recommendation.data.target_mw,
-                confidence: recommendation.data.confidence,
-              });
-            }}
-          >
-            Accept
-          </button>
         </Panel>
         <Panel persona="dispatch" title="Stack History">
           <DataTable

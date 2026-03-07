@@ -6,18 +6,18 @@ const personas = ['dispatch', 'trader', 'risk', 'quant', 'portfolio'] as const;
 const personaConfig: Record<'NEM' | 'EPEX' | 'ERCOT', Record<(typeof personas)[number], { label: string; desc: string; features: string[] }>> = {
   NEM: {
     dispatch: {
-      label: 'Dispatch Operator',
-      desc: 'Monitor NEM BESS fleet, build and submit offer stacks across FCAS and energy services.',
-      features: ['FCAS offer stacks - 7 services', 'AEMO 5-min dispatch intervals', 'Good-faith rebid compliance'],
+      label: 'Dispatch Analyst',
+      desc: 'Monitor NEM BESS fleet and analyze stack outcomes across FCAS and energy services.',
+      features: ['FCAS stack analytics - 7 services', 'AEMO 5-min dispatch intervals', 'Forecast-backed recommendation insights'],
     },
     trader: {
-      label: 'Power Trader',
+      label: 'Trading Analyst',
       desc: 'Track live positions, blotter, and mark-to-market across NEM regions.',
       features: ['NSW/VIC/QLD/SA strip', 'ALIGNE_SIM ingestion', 'P&L attribution'],
     },
     risk: {
       label: 'Risk Manager',
-      desc: 'Run VaR Monte Carlo and monitor portfolio limits with NEM event stress tests.',
+      desc: 'Analyze VaR Monte Carlo and monitor portfolio limits with NEM event stress tests.',
       features: ['Monte Carlo 10,000 paths', 'Spike scenario testing', 'Credit + limit surveillance'],
     },
     quant: {
@@ -33,18 +33,18 @@ const personaConfig: Record<'NEM' | 'EPEX' | 'ERCOT', Record<(typeof personas)[n
   },
   EPEX: {
     dispatch: {
-      label: 'Dispatch Operator',
-      desc: 'Operate EPEX battery dispatch with energy and balancing reserve services.',
+      label: 'Dispatch Analyst',
+      desc: 'Analyze EPEX battery dispatch with energy and balancing reserve services.',
       features: ['15-min MTU context', 'Balancing reserve focus', 'ENDUR_SIM provenance'],
     },
     trader: {
-      label: 'Power Trader',
+      label: 'Trading Analyst',
       desc: 'Analyze EPEX positions and blotter exposure across core bidding zones.',
       features: ['DE-LU/FR/BE spread view', 'EPEX price strip', 'Source-aligned position book'],
     },
     risk: {
       label: 'Risk Manager',
-      desc: 'Run EUR VaR and stress outcomes for cold snap and renewable flood events.',
+      desc: 'Analyze EUR VaR and stress outcomes for cold snap and renewable flood events.',
       features: ['EUR portfolio VaR', 'Scenario impact cards', 'Limit and breach monitor'],
     },
     quant: {
@@ -60,18 +60,18 @@ const personaConfig: Record<'NEM' | 'EPEX' | 'ERCOT', Record<(typeof personas)[n
   },
   ERCOT: {
     dispatch: {
-      label: 'Dispatch Operator',
-      desc: 'Manage ERCOT dispatch with RTC+B-aware offer stack controls.',
+      label: 'Dispatch Analyst',
+      desc: 'Analyze ERCOT dispatch with RTC+B-aware offer stack behavior.',
       features: ['RTC+B context', 'ENERGY/REG/ECRS services', 'Texas fleet controls'],
     },
     trader: {
-      label: 'Power Trader',
+      label: 'Trading Analyst',
       desc: 'Track nodal exposure and trade flow for ERCOT hubs and basis dynamics.',
       features: ['Houston/West/North nodes', 'TRIPLE_POINT_SIM source', 'USD mark-to-market'],
     },
     risk: {
       label: 'Risk Manager',
-      desc: 'Run USD VaR and stress against summer scarcity and wind-drop scenarios.',
+      desc: 'Analyze USD VaR and stress against summer scarcity and wind-drop scenarios.',
       features: ['USD VaR metrics', 'Scarcity stress set', 'Credit concentration tracking'],
     },
     quant: {

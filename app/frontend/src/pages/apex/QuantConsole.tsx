@@ -68,9 +68,22 @@ export function QuantConsole(): JSX.Element {
           {strategyTabs.map((tab) => {
             const disabled = !tab.available;
             return (
-              <button key={tab.strategy} disabled={disabled} title={disabled ? 'Unavailable for selected market' : undefined}>
+              <span
+                key={tab.strategy}
+                title={disabled ? 'Unavailable for selected market' : undefined}
+                style={{
+                  padding: '6px 10px',
+                  border: '1px solid var(--color-border-subtle)',
+                  background: disabled ? 'var(--color-bg-surface)' : 'var(--color-bg-surface-strong)',
+                  color: disabled ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                  borderRadius: 4,
+                  fontSize: 11,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 {tab.strategy}
-              </button>
+              </span>
             );
           })}
         </div>
