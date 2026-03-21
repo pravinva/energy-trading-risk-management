@@ -330,3 +330,438 @@ export function useTradeCounterparties(market: 'NEM' | 'EPEX' | 'ERCOT') {
     refetchInterval: 30000,
   });
 }
+
+// ============================================================================
+// Forecasting & Predictive Analytics Hooks
+// ============================================================================
+
+export function useWeatherForecast(regionId: string = 'NSW1', days: number = 7) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'weather', regionId, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            forecast_id: string;
+            region_id: string;
+            forecast_datetime: string;
+            temperature_celsius: number;
+            wind_speed_ms: number;
+            solar_irradiance_wm2: number;
+            precipitation_mm: number;
+            humidity_percent: number;
+            confidence_level: string;
+            forecast_horizon_hours: number;
+          }>
+        >
+      >('/forecasting/weather', {
+        params: { region_id: regionId, days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useWeatherImpact(regionId: string = 'NSW1') {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'weather-impact', regionId],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            region_id: string;
+            weather_parameter: string;
+            price_correlation: number;
+            price_impact_per_unit: number;
+            volatility_impact: number;
+            sample_size: number;
+            last_updated: string | null;
+          }>
+        >
+      >('/forecasting/weather/impact', {
+        params: { region_id: regionId },
+      }),
+    refetchInterval: 60000,
+  });
+}
+
+export function useVolumeForecast(regionId: string = 'NSW1', days: number = 15) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'volume', regionId, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            forecast_id: string;
+            region_id: string;
+            forecast_date: string;
+            forecast_type: string;
+            volume_mwh: number;
+            base_volume_mwh: number;
+            weather_impact_pct: number;
+            maintenance_impact_pct: number;
+            outage_impact_pct: number;
+            market_demand_factor: number;
+            confidence_level: string;
+          }>
+        >
+      >('/forecasting/volume', {
+        params: { region_id: regionId, days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useVolumeForecastSummary(regionId: string = 'NSW1', days: number = 15) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'volume-summary', regionId, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<{
+          region_id: string;
+          total_days: number;
+          buy_days: number;
+          sell_days: number;
+          avg_volume_mwh: number;
+          total_buy_volume_mwh: number;
+          total_sell_volume_mwh: number;
+        }>
+      >('/forecasting/volume/summary', {
+        params: { region_id: regionId, days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useProductionForecast(regionId: string = 'NSW1', assetType: string | null = null, days: number = 7) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'production', regionId, assetType, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            forecast_id: string;
+            region_id: string;
+            forecast_datetime: string;
+            asset_type: string;
+            generation_mw: number;
+            capacity_mw: number;
+            efficiency_percent: number;
+            availability_percent: number;
+            confidence_level: string;
+            forecast_horizon_hours: number;
+          }>
+        >
+      >('/forecasting/production', {
+        params: { region_id: regionId, asset_type: assetType, days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useGenerationMix(regionId: string = 'NSW1', hours: number = 24) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'generation-mix', regionId, hours],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            region_id: string;
+            reading_datetime: string;
+            asset_type: string;
+            generation_mw: number;
+            total_generation_mw: number;
+            mix_percentage: number;
+          }>
+        >
+      >('/forecasting/generation-mix', {
+        params: { region_id: regionId, hours },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function usePlantStatus(regionId: string = 'NSW1', eventType: string | null = null, days: number = 14) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'plant-status', regionId, eventType, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            event_id: string;
+            plant_name: string;
+            plant_type: string;
+            region_id: string;
+            event_type: string;
+            start_datetime: string;
+            end_datetime: string;
+            capacity_impact_mw: number;
+            grid_impact: string;
+            description: string;
+            status: string;
+          }>
+        >
+      >('/forecasting/plant-status', {
+        params: { region_id: regionId, event_type: eventType, days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function usePriceForecast(regionId: string = 'NSW1', marketType: string = 'DAY_AHEAD', hours: number = 24) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'price', regionId, marketType, hours],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            forecast_id: string;
+            region_id: string;
+            instrument: string;
+            forecast_datetime: string;
+            forecast_price: number;
+            actual_price: number | null;
+            error: number | null;
+            abs_error: number | null;
+            mape: number | null;
+            market_type: string;
+            confidence_level: string;
+            forecast_horizon_hours: number;
+          }>
+        >
+      >('/forecasting/price', {
+        params: { region_id: regionId, market_type: marketType, hours },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useExtremeEvents(regionId: string = 'NSW1', severity: string | null = null) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'extreme-events', regionId, severity],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            event_id: string;
+            region_id: string;
+            event_type: string;
+            severity: string;
+            start_datetime: string;
+            end_datetime: string;
+            impact_description: string;
+            price_impact_pct: number;
+            trading_alert_level: string;
+            confidence_level: number;
+          }>
+        >
+      >('/forecasting/extreme-events', {
+        params: { region_id: regionId, severity },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useForecastingModelPerformance(modelType: string | null = null, regionId: string | null = null) {
+  return useQuery({
+    queryKey: ['apex', 'forecasting', 'model-performance', modelType, regionId],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            model_id: string;
+            model_name: string;
+            model_type: string;
+            region_id: string;
+            mape: number;
+            mae: number;
+            rmse: number;
+            r2_score: number;
+            bias: number;
+            evaluation_date: string;
+            algorithm: string;
+            mlflow_run_id: string | null;
+          }>
+        >
+      >('/forecasting/model-performance', {
+        params: { model_type: modelType, region_id: regionId },
+      }),
+    refetchInterval: 60000,
+  });
+}
+
+// ============================================================================
+// Strategy & Agents Hooks
+// ============================================================================
+
+export function useStrategies(status: string | null = null) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'list', status],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            strategy_id: string;
+            strategy_name: string;
+            strategy_type: string;
+            description: string;
+            region_id: string;
+            status: string;
+            created_at: string;
+          }>
+        >
+      >('/strategies/list', {
+        params: status ? { status } : {},
+      }),
+    refetchInterval: 10000,
+  });
+}
+
+export function useBacktestRun() {
+  return useMutation({
+    mutationFn: (payload: { strategy_type: string; region_id: string; start_date: string; end_date: string; initial_capital: number; parameters?: Record<string, any> }) =>
+      apiClient.post<
+        typeof payload,
+        ApiResponse<{
+          backtest_id: string;
+          strategy_name: string;
+          total_trades: number;
+          win_rate: number;
+          total_return_pct: number;
+          sharpe_ratio: number;
+          max_drawdown_pct: number;
+          total_pnl: number;
+        }>
+      >('/strategies/backtest', payload),
+  });
+}
+
+export function useBacktestResults(strategyType: string | null = null, limit: number = 10) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'backtest-results', strategyType, limit],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            backtest_id: string;
+            strategy_name: string;
+            total_trades: number;
+            win_rate: number;
+            total_return_pct: number;
+            sharpe_ratio: number;
+            max_drawdown_pct: number;
+            total_pnl: number;
+          }>
+        >
+      >('/strategies/backtest/results', {
+        params: { strategy_type: strategyType, limit },
+      }),
+    refetchInterval: 15000,
+  });
+}
+
+export function useStrategySignals(strategyId: string | null = null, hours: number = 24) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'signals', strategyId, hours],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            signal_id: string;
+            strategy_id: string;
+            timestamp: string;
+            signal_type: string;
+            action: string;
+            instrument: string;
+            volume_mw: number;
+            confidence: number;
+            reasoning: string;
+            executed: boolean;
+          }>
+        >
+      >('/strategies/signals', {
+        params: { strategy_id: strategyId, hours },
+      }),
+    refetchInterval: 5000,
+  });
+}
+
+export function useStrategyPositions(strategyId: string | null = null) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'positions', strategyId],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            position_id: string;
+            strategy_id: string;
+            instrument: string;
+            entry_price: number;
+            volume_mw: number;
+            unrealized_pnl: number;
+            status: string;
+          }>
+        >
+      >('/strategies/positions', {
+        params: strategyId ? { strategy_id: strategyId } : {},
+      }),
+    refetchInterval: 5000,
+  });
+}
+
+export function useAgents() {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'agents'],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            agent_id: string;
+            agent_type: string;
+            agent_name: string;
+            description: string;
+            status: string;
+          }>
+        >
+      >('/strategies/agents'),
+    refetchInterval: 20000,
+  });
+}
+
+export function useAgentMessages(sessionId: string | null = null, limit: number = 50) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'agent-messages', sessionId, limit],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            message_id: string;
+            from_agent_id: string;
+            to_agent_id: string;
+            message_type: string;
+            timestamp: string;
+            content: string;
+            status: string;
+          }>
+        >
+      >('/strategies/agents/messages', {
+        params: { session_id: sessionId, limit },
+      }),
+    refetchInterval: 5000,
+  });
+}

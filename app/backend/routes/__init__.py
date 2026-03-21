@@ -12,6 +12,8 @@ from .dispatch import router as dispatch_router
 from .risk import router as risk_router
 from .portfolio import router as portfolio_router
 from .analytics import router as analytics_router
+from .forecasting import router as forecasting_router
+from .strategies import router as strategies_router
 
 router = APIRouter()
 router.include_router(health_router)
@@ -27,3 +29,5 @@ router.include_router(dispatch_router)
 router.include_router(risk_router)
 router.include_router(portfolio_router)
 router.include_router(analytics_router)
+router.include_router(forecasting_router)
+router.include_router(strategies_router)
