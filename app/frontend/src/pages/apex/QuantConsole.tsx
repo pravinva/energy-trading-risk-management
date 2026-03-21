@@ -4,6 +4,7 @@ import { useBacktestStrategies, useBacktests, useForecastMetadata, useModelLinea
 import { useTradingStore } from '@/store/tradingStore';
 import { WeatherImpact, VolumeForecast, ProductionForecast } from '@/components/forecasting';
 import { StrategyDashboard, BacktestResults, LiveStrategyMonitor, AgentCollaboration } from '@/components/strategies';
+import { DataFreshness, IngestionLogs, DataQuality } from '@/components/nemweb';
 
 export function QuantConsole(): JSX.Element {
   const market = useTradingStore((s) => s.market);
@@ -58,6 +59,11 @@ export function QuantConsole(): JSX.Element {
       <BacktestResults />
       <LiveStrategyMonitor />
       <AgentCollaboration />
+
+      {/* Phase 3: NEMWEB Data Ingestion & Monitoring */}
+      <DataFreshness />
+      <IngestionLogs />
+      <DataQuality />
 
       {/* Existing Analytics */}
       <Panel persona="quant" title="Model Performance" subtitle="Champion vs challenger">

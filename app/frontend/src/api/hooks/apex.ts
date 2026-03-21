@@ -765,3 +765,212 @@ export function useAgentMessages(sessionId: string | null = null, limit: number 
     refetchInterval: 5000,
   });
 }
+
+// ============================================================================
+// NEMWEB Data Ingestion & Monitoring Hooks
+// ============================================================================
+
+export function useNEMWEBDataFreshness() {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'freshness'],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            data_type: string;
+            region_id: string;
+            latest_data_timestamp: string | null;
+            minutes_since_latest: number | null;
+            total_records: number;
+            last_ingestion_timestamp: string | null;
+          }>
+        >
+      >('/nemweb/monitor/freshness'),
+    refetchInterval: 30000,
+  });
+}
+
+export function useNEMWEBIngestionLogs(dataType: string | null = null, regionId: string | null = null, limit: number = 50) {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'ingestion-logs', dataType, regionId, limit],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            log_id: string;
+            data_type: string;
+            date_loaded: string;
+            region_id: string;
+            records_loaded: number;
+            records_failed: number;
+            start_timestamp: string;
+            end_timestamp: string | null;
+            duration_seconds: number | null;
+            status: string;
+            error_message: string | null;
+          }>
+        >
+      >('/nemweb/ingest/logs', {
+        params: { data_type: dataType, region_id: regionId, limit },
+      }),
+    refetchInterval: 15000,
+  });
+}
+
+export function useNEMWEBIngestionSummary(days: number = 7) {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'ingestion-summary', days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            ingestion_date: string;
+            data_type: string;
+            region_id: string;
+            total_jobs: number;
+            successful_jobs: number;
+            failed_jobs: number;
+            total_records_loaded: number;
+            total_records_failed: number;
+            avg_duration_seconds: number;
+            last_run_timestamp: string;
+          }>
+        >
+      >('/nemweb/monitor/summary', {
+        params: { days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useNEMWEBQualityMetrics(dataType: string | null = null, regionId: string | null = null, metricName: string | null = null, days: number = 7, limit: number = 100) {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'quality-metrics', dataType, regionId, metricName, days, limit],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            metric_id: string;
+            check_timestamp: string;
+            data_type: string;
+            region_id: string;
+            date_checked: string;
+            metric_name: string;
+            metric_value: number;
+            threshold_value: number;
+            passed: boolean;
+            details: string;
+          }>
+        >
+      >('/nemweb/quality/metrics', {
+        params: { data_type: dataType, region_id: regionId, metric_name: metricName, days, limit },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useNEMWEBQualitySummary(days: number = 7) {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'quality-summary', days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            data_type: string;
+            metric_name: string;
+            total_checks: number;
+            passed_checks: number;
+            failed_checks: number;
+            avg_metric_value: number;
+            min_metric_value: number;
+            max_metric_value: number;
+          }>
+        >
+      >('/nemweb/quality/summary', {
+        params: { days },
+      }),
+    refetchInterval: 30000,
+  });
+}
+
+export function useNEMWEBDailyPriceStats(regionId: string = 'NSW1', days: number = 30) {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'daily-price-stats', regionId, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            price_date: string;
+            region_id: string;
+            interval_count: number;
+            avg_price: number;
+            min_price: number;
+            max_price: number;
+            price_volatility: number;
+            median_price: number;
+            p95_price: number;
+            avg_demand_mw: number;
+            peak_demand_mw: number;
+            high_price_intervals: number;
+            data_source: string;
+          }>
+        >
+      >('/nemweb/stats/daily-prices', {
+        params: { region_id: regionId, days },
+      }),
+    refetchInterval: 60000,
+  });
+}
+
+export function useNEMWEBForecastAccuracy(regionId: string = 'NSW1', days: number = 30) {
+  return useQuery({
+    queryKey: ['apex', 'nemweb', 'forecast-accuracy', regionId, days],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            forecast_date: string;
+            region_id: string;
+            interval_count: number;
+            avg_forecast_price: number;
+            avg_actual_price: number;
+            mae: number;
+            mape: number;
+            rmse: number;
+            correlation: number;
+          }>
+        >
+      >('/nemweb/stats/forecast-accuracy', {
+        params: { region_id: regionId, days },
+      }),
+    refetchInterval: 60000,
+  });
+}
+
+export function useTriggerNEMWEBIngestion() {
+  return useMutation({
+    mutationFn: (payload: { data_type: string; region_id: string; date?: string }) =>
+      apiClient.post<typeof payload, ApiResponse<{ status: string; message: string }>>('/nemweb/ingest/trigger', payload),
+  });
+}
+
+export function useTriggerNEMWEBBackfill() {
+  return useMutation({
+    mutationFn: (payload: { region_id: string; start_date: string; end_date: string }) =>
+      apiClient.post<typeof payload, ApiResponse<{ status: string; days: number; message: string }>>('/nemweb/backfill/trigger', payload),
+  });
+}
+
+export function useRunNEMWEBQualityChecks() {
+  return useMutation({
+    mutationFn: (payload: { region_id: string; date?: string }) =>
+      apiClient.post<typeof payload, ApiResponse<Array<{ metric: string; passed: boolean; details: string }>>>('/nemweb/quality/run-checks', payload),
+  });
+}
