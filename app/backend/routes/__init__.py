@@ -14,6 +14,7 @@ from .portfolio import router as portfolio_router
 from .analytics import router as analytics_router
 from .forecasting import router as forecasting_router
 from .strategies import router as strategies_router
+from .nemweb import router as nemweb_router
 
 router = APIRouter()
 router.include_router(health_router)
@@ -31,3 +32,4 @@ router.include_router(portfolio_router)
 router.include_router(analytics_router)
 router.include_router(forecasting_router)
 router.include_router(strategies_router)
+router.include_router(nemweb_router)

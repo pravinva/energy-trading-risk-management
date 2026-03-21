@@ -1,0 +1,68 @@
+# Databricks Job: NEMWEB Real-time Ingestion
+# Runs every 5 minutes to ingest dispatch prices
+
+name: "NEMWEB Real-time Dispatch Price Ingestion"
+
+schedule:
+  quartz_cron_expression: "0 */5 * * * ?"  # Every 5 minutes
+  timezone_id: "Australia/Sydney"
+  pause_status: "UNPAUSED"
+
+tasks:
+  - task_key: "ingest_dispatch_prices"
+    description: "Ingest 5-minute dispatch prices from NEMWEB"
+
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "nemweb_ingest"
+      parameters:
+        - "--data-type"
+        - "DISPATCH_PRICES"
+        - "--regions"
+        - "NSW1,VIC1,QLD1,SA1,TAS1"
+
+    new_cluster:
+      spark_version: "13.3.x-scala2.12"
+      node_type_id: "i3.xlarge"
+      num_workers: 2
+      spark_conf:
+        "spark.databricks.delta.preview.enabled": "true"
+        "spark.sql.adaptive.enabled": "true"
+
+    libraries:
+      - pypi:
+          package: "httpx"
+      - pypi:
+          package: "pydantic"
+
+    timeout_seconds: 900  # 15 minutes
+    max_retries: 3
+    retry_on_timeout: true
+
+  - task_key: "validate_data_quality"
+    description: "Run data quality checks"
+    depends_on:
+      - task_key: "ingest_dispatch_prices"
+
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "data_quality_check"
+      parameters:
+        - "--data-type"
+        - "DISPATCH_PRICES"
+
+    existing_cluster_id: "{{ cluster_id }}"
+
+    timeout_seconds: 300
+    max_retries: 1
+
+email_notifications:
+  on_failure:
+    - "pravin.varma@databricks.com"
+  on_success: []
+
+tags:
+  environment: "production"
+  component: "data_ingestion"
+  data_source: "nemweb"
+  frequency: "real_time"
