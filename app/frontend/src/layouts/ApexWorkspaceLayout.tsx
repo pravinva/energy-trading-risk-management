@@ -13,16 +13,16 @@ const riskItemsPrimary = [
 
 const navByPersona = {
   dispatch: {
-    sectionA: 'Analytics',
-    itemsA: [{ to: '/workspace/dispatch', label: 'Fleet Monitor' }, { to: '/workspace/dispatch', label: 'Stack Analytics' }],
-    sectionB: 'Models',
-    itemsB: [{ to: '/workspace/dispatch', label: 'Recommendation Insights' }, { to: '/workspace/dispatch', label: 'History' }],
+    sectionA: 'Dispatch',
+    itemsA: [{ to: '/workspace/dispatch', label: 'Console' }, { to: '/workspace/dispatch', label: 'Fleet Overview' }],
+    sectionB: 'Assets',
+    itemsB: [{ to: '/workspace/dispatch', label: 'Fleet' }, { to: '/workspace/dispatch', label: 'Stack History' }],
   },
   trader: {
-    sectionA: 'Analytics',
-    itemsA: [{ to: '/workspace/trading', label: 'Flow Summary' }, { to: '/workspace/trading', label: 'Position Exposure' }, { to: '/workspace/trading', label: 'Flow Tape' }],
+    sectionA: 'Trading Analytics',
+    itemsA: [{ to: '/workspace/trading', label: 'Overview' }, { to: '/workspace/trading', label: 'Position Book' }, { to: '/workspace/trading', label: 'Trade Blotter' }],
     sectionB: 'Views',
-    itemsB: [{ to: '/workspace/trading', label: 'By Region' }, { to: '/workspace/trading', label: 'Risk Heatmap' }],
+    itemsB: [{ to: '/workspace/trading', label: 'By Region' }, { to: '/workspace/trading', label: 'P&L Attribution' }],
   },
   risk: {
     sectionA: 'Risk',
@@ -45,8 +45,8 @@ const navByPersona = {
 };
 
 const personaLabel = {
-  dispatch: 'Dispatch Analyst',
-  trader: 'Trading Analyst',
+  dispatch: 'Dispatch Operator',
+  trader: 'Power Trader',
   risk: 'Risk Manager',
   quant: 'Quant Developer',
   portfolio: 'Portfolio Manager',

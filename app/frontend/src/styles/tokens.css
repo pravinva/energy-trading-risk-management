@@ -1,53 +1,93 @@
 :root {
-  --color-bg-void: #13181d;
-  --color-bg-base: #1b1f23;
-  --color-bg-elevated: #22272c;
-  --color-bg-raised: #292e35;
-  --color-bg-panel: #1f2429;
-  --color-bg-overlay: #2d333b;
-  --color-bg-input: #13181d;
-  --color-border-subtle: #2a3038;
-  --color-border-default: #343c47;
-  --color-border-strong: #434d5c;
-  --color-text-primary: #e2e8f0;
-  --color-text-secondary: #b3bfce;
-  --color-text-tertiary: #8e99aa;
-  --color-text-inverse: #13181d;
-  --color-text-muted: #2d3748;
-  --color-positive: #34d399;
-  --color-positive-dim: #34d39918;
-  --color-negative: #ff6b6b;
-  --color-negative-dim: #ff6b6b18;
-  --color-bid: #34d399;
-  --color-bid-dim: #34d39918;
-  --color-offer: #ff6b6b;
-  --color-offer-dim: #ff6b6b18;
-  --color-pnl-positive: #34d399;
-  --color-pnl-negative: #ff6b6b;
-  --color-pnl-flat: #b3bfce;
-  --color-neutral: #60a5fa;
-  --color-neutral-dim: #60a5fa18;
-  --color-warning: #fbbf24;
-  --color-warning-dim: #fbbf2418;
-  --color-accent: #ff6b6b;
-  --color-market-open: #34d399;
-  --color-market-closed: #b3bfce;
-  --color-market-auction: #fbbf24;
-  --color-price-up: #34d399;
-  --color-price-down: #ff6b6b;
-  --color-price-unchanged: #b3bfce;
+  /* Databricks Brand Colors */
+  --db-red: #FF3621;
+  --db-navy: #1B2431;
+
+  /* Background Colors (Light Theme) */
+  --color-bg-void: #F0F2F5;
+  --color-bg-base: #F0F2F5;
+  --color-bg-elevated: #fff;
+  --color-bg-raised: #fff;
+  --color-bg-panel: #fff;
+  --color-bg-overlay: #fff;
+  --color-bg-input: #fff;
+
+  /* Border Colors */
+  --color-border-subtle: #F1F5F9;
+  --color-border-default: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* Text Colors */
+  --color-text-primary: #1B2431;
+  --color-text-secondary: #64748B;
+  --color-text-tertiary: #94A3B8;
+  --color-text-inverse: #fff;
+  --color-text-muted: #64748B;
+
+  /* Status Colors */
+  --color-positive: #16A34A;
+  --color-positive-dim: rgba(22, 163, 74, 0.08);
+  --color-negative: #DC2626;
+  --color-negative-dim: rgba(220, 38, 38, 0.08);
+
+  /* Trading Colors */
+  --color-bid: #16A34A;
+  --color-bid-dim: #DCFCE7;
+  --color-offer: #DC2626;
+  --color-offer-dim: #FEE2E2;
+
+  /* P&L Colors */
+  --color-pnl-positive: #16A34A;
+  --color-pnl-negative: #DC2626;
+  --color-pnl-flat: #64748B;
+
+  /* Accent Colors */
+  --color-neutral: #FF3621;
+  --color-neutral-dim: rgba(255, 54, 33, 0.08);
+  --color-warning: #D97706;
+  --color-warning-dim: rgba(217, 119, 6, 0.08);
+  --color-accent: #FF3621;
+
+  /* Market Status Colors */
+  --color-market-open: #16A34A;
+  --color-market-closed: #64748B;
+  --color-market-auction: #D97706;
+
+  /* Price Movement Colors */
+  --color-price-up: #16A34A;
+  --color-price-down: #DC2626;
+  --color-price-unchanged: #64748B;
+
+  /* Persona Colors */
   --color-persona-dispatch: #60a5fa;
-  --color-persona-trader: #ff6b6b;
+  --color-persona-trader: #FF3621;
   --color-persona-quant: #a78bfa;
-  --color-persona-risk: #fbbf24;
-  --color-persona-portfolio: #10b981;
+  --color-persona-risk: #D97706;
+  --color-persona-portfolio: #16A34A;
+
+  /* Hover/Active States */
   --color-accent-hover: #ff5252;
   --color-accent-active: #ff4343;
+
+  /* Region Colors */
   --color-region-anz: #60a5fa;
   --color-region-europe: #a78bfa;
   --color-region-americas: #fbbf24;
-  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-data: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* Status Backgrounds */
+  --green: #16A34A;
+  --amber: #D97706;
+  --red: #DC2626;
+  --green-bg: #F0FDF4;
+  --amber-bg: #FFFBEB;
+  --red-bg: #FEF2F2;
+  --green-lt: #DCFCE7;
+  --amber-lt: #FEF3C7;
+  --red-lt: #FEE2E2;
+
+  /* Fonts - IBM Plex */
+  --font-ui: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-data: 'IBM Plex Mono', 'Courier New', monospace;
   --text-2xs: 0.8125rem;
   --text-xs: 0.875rem;
   --text-sm: 0.9375rem;
@@ -85,15 +125,15 @@
   --radius-md: 5px;
   --radius-lg: 8px;
   --radius-none: 0px;
-  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.2), 0 6px 18px rgba(2, 10, 24, 0.28);
-  --shadow-elevated: 0 8px 22px rgba(2, 10, 24, 0.35), 0 2px 8px rgba(0, 0, 0, 0.16);
-  --shadow-overlay: 0 12px 34px rgba(2, 10, 24, 0.45);
+  --shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-elevated: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-overlay: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --transition-fast: 100ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 300ms ease;
   --transition-data-flash: background-color 150ms ease;
   --transition-price: background-color 150ms ease;
 }
-[data-theme='dark'] {
-  color-scheme: dark;
+[data-theme='light'] {
+  color-scheme: light;
 }

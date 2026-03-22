@@ -92,10 +92,10 @@ export function TradingBlotter(): JSX.Element {
           />
         ) : null}
       </Panel>
-      <Panel persona="trader" title="Position Exposure" subtitle={`${market} position book`}>
+      <Panel persona="trader" title="Position Book" subtitle={`${market} position exposure`}>
         <DataTable data={positions.data ?? []} columns={[{ header: 'Instrument', accessorKey: 'instrument' }, { header: 'Net MW', accessorKey: 'net_position_mw', meta: { kind: 'mw' } }, { header: 'Avg Px', accessorKey: 'avg_trade_price', meta: { kind: 'price' } }]} />
       </Panel>
-      <Panel persona="trader" title="Net Exposure Heatmap" subtitle={`${market} period risk`}>
+      <Panel persona="trader" title="Net Exposure" subtitle={`${market} period heatmap`}>
         <DataTable
           data={heatmapRows}
           columns={[
@@ -107,7 +107,7 @@ export function TradingBlotter(): JSX.Element {
           ]}
         />
       </Panel>
-      <Panel persona="trader" title="Trading Flow Tape" subtitle={`${market} ingestion analytics`}>
+      <Panel persona="trader" title="Trade Blotter" subtitle={`${market} ingestion analytics`}>
         <DataTable data={blotterRows} columns={columns} />
       </Panel>
     </div>

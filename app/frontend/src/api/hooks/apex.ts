@@ -671,6 +671,55 @@ export function useBacktestResults(strategyType: string | null = null, limit: nu
   });
 }
 
+export function useEquityCurve(backtestId: string | null) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'equity-curve', backtestId],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            timestamp: string;
+            portfolio_value: number;
+            cash: number;
+            position_value: number;
+            total_pnl: number;
+            drawdown: number;
+            drawdown_pct: number;
+            open_positions: number;
+          }>
+        >
+      >(`/strategies/backtest/${backtestId}/equity-curve`),
+    enabled: Boolean(backtestId),
+    refetchInterval: 60000,
+  });
+}
+
+export function useBacktestTrades(backtestId: string | null) {
+  return useQuery({
+    queryKey: ['apex', 'strategies', 'backtest-trades', backtestId],
+    queryFn: () =>
+      apiClient.get<
+        never,
+        ApiResponse<
+          Array<{
+            trade_id: string;
+            timestamp: string;
+            action: string;
+            instrument: string;
+            volume_mw: number;
+            price: number;
+            pnl: number | null;
+            cumulative_pnl: number;
+            portfolio_value: number;
+          }>
+        >
+      >(`/strategies/backtest/${backtestId}/trades`),
+    enabled: Boolean(backtestId),
+    refetchInterval: 60000,
+  });
+}
+
 export function useStrategySignals(strategyId: string | null = null, hours: number = 24) {
   return useQuery({
     queryKey: ['apex', 'strategies', 'signals', strategyId, hours],

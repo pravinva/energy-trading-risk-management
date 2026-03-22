@@ -58,6 +58,29 @@ class BacktestResult(BaseModel):
     total_pnl: float
 
 
+class EquityCurvePoint(BaseModel):
+    timestamp: str
+    portfolio_value: float
+    cash: float
+    position_value: float
+    total_pnl: float
+    drawdown: float
+    drawdown_pct: float
+    open_positions: int
+
+
+class BacktestTrade(BaseModel):
+    trade_id: str
+    timestamp: str
+    action: str
+    instrument: str
+    volume_mw: float
+    price: float
+    pnl: Optional[float]
+    cumulative_pnl: float
+    portfolio_value: float
+
+
 class AgentInfo(BaseModel):
     agent_id: str
     agent_type: str
@@ -267,6 +290,79 @@ async def get_backtest_results(
     results = [BacktestResult.model_validate(r) for r in rows]
 
     return APIResponse(data=results)
+
+
+@router.get("/backtest/{backtest_id}/equity-curve", response_model=APIResponse[List[EquityCurvePoint]])
+async def get_equity_curve(
+    backtest_id: str,
+) -> APIResponse[List[EquityCurvePoint]]:
+    """
+    Get equity curve for a specific backtest
+
+    Args:
+        backtest_id: Backtest ID
+
+    Returns:
+        Time series of portfolio values and metrics
+    """
+    catalog = get_settings().apex_catalog
+
+    sql = f"""
+    SELECT
+        CAST(timestamp AS STRING) AS timestamp,
+        CAST(portfolio_value AS DOUBLE) AS portfolio_value,
+        CAST(cash AS DOUBLE) AS cash,
+        CAST(position_value AS DOUBLE) AS position_value,
+        CAST(total_pnl AS DOUBLE) AS total_pnl,
+        CAST(drawdown AS DOUBLE) AS drawdown,
+        CAST(drawdown_pct AS DOUBLE) AS drawdown_pct,
+        CAST(open_positions AS INT) AS open_positions
+    FROM {catalog}.strategy.backtest_metrics_ts
+    WHERE backtest_id = '{backtest_id}'
+    ORDER BY timestamp ASC
+    """
+
+    rows = await execute_sql(sql)
+    equity_curve = [EquityCurvePoint.model_validate(r) for r in rows]
+
+    return APIResponse(data=equity_curve)
+
+
+@router.get("/backtest/{backtest_id}/trades", response_model=APIResponse[List[BacktestTrade]])
+async def get_backtest_trades(
+    backtest_id: str,
+) -> APIResponse[List[BacktestTrade]]:
+    """
+    Get all trades for a specific backtest
+
+    Args:
+        backtest_id: Backtest ID
+
+    Returns:
+        List of trades with PnL information
+    """
+    catalog = get_settings().apex_catalog
+
+    sql = f"""
+    SELECT
+        trade_id,
+        CAST(timestamp AS STRING) AS timestamp,
+        action,
+        instrument,
+        CAST(volume_mw AS DOUBLE) AS volume_mw,
+        CAST(price AS DOUBLE) AS price,
+        CAST(pnl AS DOUBLE) AS pnl,
+        CAST(cumulative_pnl AS DOUBLE) AS cumulative_pnl,
+        CAST(portfolio_value AS DOUBLE) AS portfolio_value
+    FROM {catalog}.strategy.backtest_trades
+    WHERE backtest_id = '{backtest_id}'
+    ORDER BY timestamp ASC
+    """
+
+    rows = await execute_sql(sql)
+    trades = [BacktestTrade.model_validate(r) for r in rows]
+
+    return APIResponse(data=trades)
 
 
 # ============================================================================

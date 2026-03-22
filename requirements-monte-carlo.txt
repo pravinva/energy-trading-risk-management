@@ -1,0 +1,18 @@
+# Monte Carlo Simulation Libraries
+
+# Core financial libraries
+QuantLib>=1.32
+QuantLib-Python>=1.32
+
+# Stochastic processes
+stochastic>=0.7.0
+
+# Risk metrics (Python 3.14 compatible)
+quantstats>=0.0.62
+
+# Statistical analysis
+pymc>=5.10.0
+arviz>=0.17.0
+
+# Performance optimization
+numba>=0.58.0

@@ -72,7 +72,7 @@ export function DispatchConsole(): JSX.Element {
         </div>
       </Panel>
 
-      <Panel persona="dispatch" title="Offer Stack Analytics" subtitle={`${assetId} · ${serviceType}`}>
+      <Panel persona="dispatch" title="Offer Stack Builder" subtitle={`${assetId} · ${serviceType}`}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
           <select value={assetId} onChange={(e) => setAssetId(e.target.value)}>
             {assets.map((asset) => <option key={asset}>{asset}</option>)}
@@ -102,7 +102,7 @@ export function DispatchConsole(): JSX.Element {
       </Panel>
 
       <div style={{ display: 'grid', gap: 10 }}>
-        <Panel persona="dispatch" title="ML Recommendation Insights">
+        <Panel persona="dispatch" title="ML Recommendations">
           <div className="font-data">Suggested Action: {recommendation.data?.action ?? '--'}</div>
           <div className="font-data">Suggested Target MW: {recommendation.data?.target_mw?.toFixed(2) ?? '--'}</div>
           <div className="font-data">Confidence Score: {recommendation.data?.confidence?.toFixed(2) ?? '--'}</div>

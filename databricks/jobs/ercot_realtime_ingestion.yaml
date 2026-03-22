@@ -1,0 +1,94 @@
+name: "ERCOT Real-time Market Data Ingestion"
+description: "Ingests ERCOT real-time SPP, DAM prices, load forecasts, and renewable generation every 5 minutes"
+
+schedule:
+  quartz_cron_expression: "0 */5 * * * ?"  # Every 5 minutes
+  timezone_id: "America/Chicago"
+  pause_status: "UNPAUSED"
+
+email_notifications:
+  on_failure:
+    - trading-ops@company.com
+
+max_concurrent_runs: 1
+
+tasks:
+  - task_key: "ingest_ercot_rt_prices_busavg"
+    description: "Ingest ERCOT real-time prices for system average (5-min SPP)"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_realtime"
+      parameters:
+        - "--settlement-point"
+        - "HB_BUSAVG"
+        - "--lookback-hours"
+        - "1"
+    new_cluster:
+      spark_version: "13.3.x-scala2.12"
+      node_type_id: "i3.xlarge"
+      num_workers: 2
+      spark_conf:
+        spark.databricks.delta.preview.enabled: "true"
+    timeout_seconds: 900
+    max_retries: 3
+    retry_on_timeout: true
+
+  - task_key: "ingest_ercot_rt_prices_north"
+    description: "Ingest North Hub real-time prices"
+    depends_on:
+      - task_key: "ingest_ercot_rt_prices_busavg"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_realtime"
+      parameters:
+        - "--settlement-point"
+        - "HB_NORTH"
+        - "--lookback-hours"
+        - "1"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 900
+    max_retries: 3
+
+  - task_key: "ingest_ercot_rt_prices_south"
+    description: "Ingest South Hub real-time prices"
+    depends_on:
+      - task_key: "ingest_ercot_rt_prices_north"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_realtime"
+      parameters:
+        - "--settlement-point"
+        - "HB_SOUTH"
+        - "--lookback-hours"
+        - "1"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 900
+    max_retries: 3
+
+  - task_key: "ingest_ercot_rt_prices_houston"
+    description: "Ingest Houston Hub real-time prices"
+    depends_on:
+      - task_key: "ingest_ercot_rt_prices_south"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_realtime"
+      parameters:
+        - "--settlement-point"
+        - "HB_HOUSTON"
+        - "--lookback-hours"
+        - "1"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 900
+    max_retries: 3
+
+tags:
+  market: "ERCOT"
+  data_source: "ERCOT_API"
+  frequency: "5-minute"
+  environment: "production"
+
+access_control_list:
+  - user_name: "trading-team@company.com"
+    permission_level: "CAN_MANAGE_RUN"
+  - group_name: "data-engineers"
+    permission_level: "CAN_MANAGE"

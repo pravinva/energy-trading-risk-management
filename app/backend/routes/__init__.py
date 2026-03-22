@@ -15,6 +15,8 @@ from .analytics import router as analytics_router
 from .forecasting import router as forecasting_router
 from .strategies import router as strategies_router
 from .nemweb import router as nemweb_router
+from .epex import router as epex_router
+from .ercot import router as ercot_router
 
 router = APIRouter()
 router.include_router(health_router)
@@ -33,3 +35,5 @@ router.include_router(analytics_router)
 router.include_router(forecasting_router)
 router.include_router(strategies_router)
 router.include_router(nemweb_router)
+router.include_router(epex_router)
+router.include_router(ercot_router)

@@ -3,11 +3,13 @@ import { DataTable, Panel } from '@/components/primitives';
 import { useForecastMetadata, useLimitStatus, useMarketSpotPrice, useModelLineage, usePredispatch, useStressScenarios, useVaR } from '@/api/hooks/apex';
 import { useTraders } from '@/api/hooks/useUserContext';
 import { useTradingStore } from '@/store/tradingStore';
+import { RiskHeatmap } from '@/components/charts';
 
 export function RiskDashboard(): JSX.Element {
   const [spotPrice, setSpotPrice] = useState(96);
   const [volatility, setVolatility] = useState(0.12);
   const [traderScope, setTraderScope] = useState('');
+  const [hasBootstrappedVar, setHasBootstrappedVar] = useState(false);
   const varCalc = useVaR();
   const limits = useLimitStatus();
   const market = useTradingStore((s) => s.market);
@@ -62,8 +64,19 @@ export function RiskDashboard(): JSX.Element {
     }
   }, [traderOptions, traderScope]);
 
+  useEffect(() => {
+    if (hasBootstrappedVar || varCalc.isPending || spotPrice <= 0) return;
+    varCalc.mutate(
+      { confidence: 0.95, spot_price: spotPrice, volatility },
+      { onSettled: () => setHasBootstrappedVar(true) },
+    );
+  }, [hasBootstrappedVar, spotPrice, volatility, varCalc]);
+
   return (
     <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
+      {/* Phase 4: Advanced Risk Visualization */}
+      <RiskHeatmap market={market} spotPrice={spotPrice} volatility={volatility * 100} />
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
         <Panel persona="risk" title="Portfolio VaR 95%">
           <div className="font-data text-2xl">{varCalc.data?.var_95?.toFixed(2) ?? '--'}</div>
@@ -81,8 +94,12 @@ export function RiskDashboard(): JSX.Element {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <Panel
           persona="risk"
-          title="VaR Analysis"
-          subtitle={forecastMeta.data ? `Forecast source: ${forecastMeta.data.model_name} (${forecastMeta.data.points_available} points)` : 'Forecast source loading'}
+          title="VaR Dashboard"
+          subtitle={
+            forecastMeta.data
+              ? `Portfolio risk exposure — Monte Carlo 10,000 paths · Forecast source ${forecastMeta.data.model_name} (${forecastMeta.data.points_available} points)`
+              : 'Portfolio risk exposure — Monte Carlo 10,000 paths'
+          }
         >
           <div
             style={{
@@ -120,7 +137,7 @@ export function RiskDashboard(): JSX.Element {
               <div key={bar.id} className="bar" style={{ minWidth: 2, height: `${bar.height}px`, background: bar.color }} />
             ))}
           </div>
-          <div className="label-caps" style={{ marginTop: 8 }}>VaR 99% - 30 day trend</div>
+          <div className="label-caps" style={{ marginTop: 8 }}>VaR 99% — 30-Day Trend</div>
           <svg width="100%" height="62" viewBox="0 0 100 62">
             <polyline fill="none" stroke="var(--color-warning)" strokeWidth="1.5" points={trendPoints} />
           </svg>
@@ -129,7 +146,7 @@ export function RiskDashboard(): JSX.Element {
           <Panel persona="risk" title="Limit Monitor">
             <DataTable data={limits.data ?? []} columns={[{ header: 'Metric', accessorKey: 'metric' }, { header: 'Current', accessorKey: 'current', meta: { kind: 'price' } }, { header: 'Limit', accessorKey: 'limit', meta: { kind: 'price' } }, { header: 'Breached', accessorKey: 'breached' }]} />
           </Panel>
-          <Panel persona="risk" title={`Stress Scenarios - ${market}`}>
+          <Panel persona="risk" title={`Stress Scenarios — ${market}`}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {stressScenarios.map((scenario) => (
                 <div key={scenario.scenario} style={{ background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: 8 }}>

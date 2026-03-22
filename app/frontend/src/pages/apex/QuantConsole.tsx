@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { DataTable, Panel } from '@/components/primitives';
-import { useBacktestStrategies, useBacktests, useForecastMetadata, useModelLineage, useModelPerformance, usePredispatch } from '@/api/hooks/apex';
+import { useBacktestStrategies, useBacktests, useForecastMetadata, useModelLineage, useModelPerformance, usePredispatch, useBacktestResults } from '@/api/hooks/apex';
 import { useTradingStore } from '@/store/tradingStore';
 import { WeatherImpact, VolumeForecast, ProductionForecast } from '@/components/forecasting';
 import { StrategyDashboard, BacktestResults, LiveStrategyMonitor, AgentCollaboration } from '@/components/strategies';
 import { DataFreshness, IngestionLogs, DataQuality } from '@/components/nemweb';
+import { PriceChart, ForecastAccuracyChart, PriceAlerts, StrategyComparisonChart, RiskHeatmap } from '@/components/charts';
 
 export function QuantConsole(): JSX.Element {
   const market = useTradingStore((s) => s.market);
@@ -49,6 +50,17 @@ export function QuantConsole(): JSX.Element {
 
   return (
     <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
+      {/* Phase 4: Advanced Analytics & Visualization - Market Data */}
+      <PriceChart regionId={regionId} days={30} />
+      <ForecastAccuracyChart regionId={regionId} days={30} />
+      <PriceAlerts regionId={regionId} days={7} />
+
+      {/* Phase 4: Advanced Analytics & Visualization - Strategy Analysis */}
+      <StrategyComparisonChart strategyType={null} limit={10} />
+
+      {/* Phase 4: Advanced Analytics & Visualization - Risk Management */}
+      <RiskHeatmap market={market} spotPrice={100} volatility={25} />
+
       {/* Phase 1: Forecasting & Predictive Analytics */}
       <VolumeForecast regionId={regionId} days={15} />
       <WeatherImpact regionId={regionId} days={7} />
