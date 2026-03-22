@@ -3,6 +3,8 @@ import { DataTable, Panel } from '@/components/primitives';
 import { useDispatchAssets, useDispatchRecommendation, useDispatchServiceTypes, useDispatchStackHistory, useForecastMetadata, useLatestOfferStack, useMarketSummary, useModelLineage, usePredispatch } from '@/api/hooks/apex';
 import { useDispatchStore } from '@/store/dispatchStore';
 import { useTradingStore } from '@/store/tradingStore';
+import { Tooltip } from '@/components/Tooltip';
+import { getMetricInfo } from '@/config/dataDictionary';
 
 export function DispatchConsole(): JSX.Element {
   const { assetId, serviceType, setBands, setAssetId, setServiceType } = useDispatchStore();
@@ -85,9 +87,20 @@ export function DispatchConsole(): JSX.Element {
           <DataTable
             data={latestBands.map((band) => ({ band: `Band ${band.band_index}`, price: band.price, volume: band.volume_mw }))}
             columns={[
-              { header: 'Band', accessorKey: 'band' },
-              { header: 'Price', accessorKey: 'price', meta: { kind: 'price' } },
-              { header: 'Volume', accessorKey: 'volume', meta: { kind: 'mw' } },
+              {
+                header: () => <Tooltip {...getMetricInfo('offer_band')!}>Band</Tooltip>,
+                accessorKey: 'band'
+              },
+              {
+                header: () => <Tooltip {...getMetricInfo('band_price')!}>Price</Tooltip>,
+                accessorKey: 'price',
+                meta: { kind: 'price' }
+              },
+              {
+                header: () => <Tooltip {...getMetricInfo('band_volume')!}>Volume</Tooltip>,
+                accessorKey: 'volume',
+                meta: { kind: 'mw' }
+              },
             ]}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: 8 }}>

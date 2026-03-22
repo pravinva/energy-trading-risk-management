@@ -3,7 +3,9 @@ import { DataTable, Panel } from '@/components/primitives';
 import { useForecastMetadata, useLimitStatus, useMarketSpotPrice, useModelLineage, usePredispatch, useStressScenarios, useVaR } from '@/api/hooks/apex';
 import { useTraders } from '@/api/hooks/useUserContext';
 import { useTradingStore } from '@/store/tradingStore';
-import { RiskHeatmap } from '@/components/charts';
+// import { RiskHeatmap } from '@/components/charts';
+import { Tooltip } from '@/components/Tooltip';
+import { getMetricInfo } from '@/config/dataDictionary';
 
 export function RiskDashboard(): JSX.Element {
   const [spotPrice, setSpotPrice] = useState(96);
@@ -75,16 +77,28 @@ export function RiskDashboard(): JSX.Element {
   return (
     <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
       {/* Phase 4: Advanced Risk Visualization */}
-      <RiskHeatmap market={market} spotPrice={spotPrice} volatility={volatility * 100} />
+      {/* <RiskHeatmap market={market} spotPrice={spotPrice} volatility={volatility * 100} /> */}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-        <Panel persona="risk" title="Portfolio VaR 95%">
+        <Panel persona="risk" title={
+          <Tooltip {...getMetricInfo('var_95')!}>
+            Portfolio VaR 95%
+          </Tooltip>
+        }>
           <div className="font-data text-2xl">{varCalc.data?.var_95?.toFixed(2) ?? '--'}</div>
         </Panel>
-        <Panel persona="risk" title="Portfolio VaR 99%">
+        <Panel persona="risk" title={
+          <Tooltip {...getMetricInfo('var_99')!}>
+            Portfolio VaR 99%
+          </Tooltip>
+        }>
           <div className="font-data text-2xl">{varCalc.data?.var_99?.toFixed(2) ?? '--'}</div>
         </Panel>
-        <Panel persona="risk" title="Position Value">
+        <Panel persona="risk" title={
+          <Tooltip {...getMetricInfo('position_value')!}>
+            Position Value
+          </Tooltip>
+        }>
           <div className="font-data text-2xl">{positionValue.toFixed(2)}</div>
         </Panel>
         <Panel persona="risk" title="Limit Utilisation">
@@ -126,21 +140,116 @@ export function RiskDashboard(): JSX.Element {
             </select>
             <button onClick={() => varCalc.mutate({ confidence: 0.95, spot_price: spotPrice, volatility })}>Refresh VaR</button>
           </div>
-          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-            <div className="font-data">Exposure: {varCalc.data?.exposure_mw?.toFixed(2) ?? '--'}</div>
-            <div className="font-data">VaR95: {varCalc.data?.var_95?.toFixed(2) ?? '--'}</div>
-            <div className="font-data">VaR99: {varCalc.data?.var_99?.toFixed(2) ?? '--'}</div>
-            <div className="font-data">ES95: {varCalc.data?.expected_shortfall_95?.toFixed(2) ?? '--'}</div>
+          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div className="font-data">
+              <Tooltip {...getMetricInfo('exposure_mw')!}>
+                Exposure
+              </Tooltip>: {varCalc.data?.exposure_mw?.toFixed(2) ?? '--'}
+            </div>
+            <div className="font-data">
+              <Tooltip {...getMetricInfo('var_95')!}>
+                VaR95
+              </Tooltip>: {varCalc.data?.var_95?.toFixed(2) ?? '--'}
+            </div>
+            <div className="font-data">
+              <Tooltip {...getMetricInfo('var_99')!}>
+                VaR99
+              </Tooltip>: {varCalc.data?.var_99?.toFixed(2) ?? '--'}
+            </div>
+            <div className="font-data">
+              <Tooltip {...getMetricInfo('expected_shortfall')!}>
+                ES95
+              </Tooltip>: {varCalc.data?.expected_shortfall_95?.toFixed(2) ?? '--'}
+            </div>
           </div>
-          <div className="var-chart" style={{ marginTop: 12 }}>
-            {bars.map((bar) => (
-              <div key={bar.id} className="bar" style={{ minWidth: 2, height: `${bar.height}px`, background: bar.color }} />
-            ))}
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div className="label-caps" style={{ marginTop: 0 }}>
+                <Tooltip {...getMetricInfo('forecast_price')!}>
+                  Price Forecast - Next 60 Hours
+                </Tooltip>
+              </div>
+              <div style={{ display: 'flex', gap: 12, fontSize: 'var(--text-2xs)', color: 'var(--color-text-tertiary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 8, height: 8, background: 'var(--color-negative)', borderRadius: 1 }} />
+                  <span>High (&gt;75%)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 8, height: 8, background: 'var(--color-warning)', borderRadius: 1 }} />
+                  <span>Med (50-75%)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 8, height: 8, background: 'var(--color-positive)', borderRadius: 1 }} />
+                  <span>Low (&lt;50%)</span>
+                </div>
+              </div>
+            </div>
+            <div className="var-chart" style={{ marginTop: 0 }}>
+              {bars.map((bar) => (
+                <div key={bar.id} className="bar" style={{ minWidth: 2, height: `${bar.height}px`, background: bar.color }} />
+              ))}
+            </div>
           </div>
-          <div className="label-caps" style={{ marginTop: 8 }}>VaR 99% — 30-Day Trend</div>
-          <svg width="100%" height="62" viewBox="0 0 100 62">
-            <polyline fill="none" stroke="var(--color-warning)" strokeWidth="1.5" points={trendPoints} />
-          </svg>
+          <div className="label-caps" style={{ marginTop: 16, marginBottom: 4 }}>
+            <Tooltip {...getMetricInfo('var_99')!}>
+              VaR 99% — 30-Day Trend
+            </Tooltip>
+          </div>
+          <div style={{ position: 'relative', marginTop: 8 }}>
+            <svg width="100%" height="120" viewBox="0 0 400 120" style={{ overflow: 'visible' }}>
+              {/* Grid lines */}
+              <line x1="40" y1="10" x2="390" y2="10" stroke="var(--color-border-subtle)" strokeWidth="0.5" strokeDasharray="2,2" />
+              <line x1="40" y1="35" x2="390" y2="35" stroke="var(--color-border-subtle)" strokeWidth="0.5" strokeDasharray="2,2" />
+              <line x1="40" y1="60" x2="390" y2="60" stroke="var(--color-border-subtle)" strokeWidth="0.5" strokeDasharray="2,2" />
+              <line x1="40" y1="85" x2="390" y2="85" stroke="var(--color-border-subtle)" strokeWidth="0.5" strokeDasharray="2,2" />
+
+              {/* Y-axis */}
+              <line x1="40" y1="10" x2="40" y2="85" stroke="var(--color-border-default)" strokeWidth="1" />
+              <text x="35" y="15" textAnchor="end" fontSize="9" fill="var(--color-text-tertiary)" fontFamily="var(--font-data)">
+                {maxTrend.toFixed(0)}
+              </text>
+              <text x="35" y="62" textAnchor="end" fontSize="9" fill="var(--color-text-tertiary)" fontFamily="var(--font-data)">
+                {((maxTrend + minTrend) / 2).toFixed(0)}
+              </text>
+              <text x="35" y="89" textAnchor="end" fontSize="9" fill="var(--color-text-tertiary)" fontFamily="var(--font-data)">
+                {minTrend.toFixed(0)}
+              </text>
+
+              {/* X-axis */}
+              <line x1="40" y1="85" x2="390" y2="85" stroke="var(--color-border-default)" strokeWidth="1" />
+              <text x="40" y="100" textAnchor="start" fontSize="9" fill="var(--color-text-tertiary)" fontFamily="var(--font-data)">
+                30d ago
+              </text>
+              <text x="215" y="100" textAnchor="middle" fontSize="9" fill="var(--color-text-tertiary)" fontFamily="var(--font-data)">
+                15d
+              </text>
+              <text x="390" y="100" textAnchor="end" fontSize="9" fill="var(--color-text-tertiary)" fontFamily="var(--font-data)">
+                Now
+              </text>
+
+              {/* Trend line - adjusted for new coordinate system */}
+              <polyline
+                fill="none"
+                stroke="var(--color-warning)"
+                strokeWidth="2"
+                points={var99Trend
+                  .map((value, index) => {
+                    const x = 40 + (index / (var99Trend.length - 1)) * 350;
+                    const y = maxTrend === minTrend ? 47.5 : 85 - ((value - minTrend) / (maxTrend - minTrend)) * 75;
+                    return `${x},${y}`;
+                  })
+                  .join(' ')}
+              />
+
+              {/* Legend */}
+              <g transform="translate(45, 105)">
+                <line x1="0" y1="0" x2="16" y2="0" stroke="var(--color-warning)" strokeWidth="2" />
+                <text x="20" y="4" fontSize="9" fill="var(--color-text-secondary)" fontFamily="var(--font-ui)">
+                  99% VaR - Maximum expected loss at 99% confidence
+                </text>
+              </g>
+            </svg>
+          </div>
         </Panel>
         <div style={{ display: 'grid', gap: 10 }}>
           <Panel persona="risk" title="Limit Monitor">

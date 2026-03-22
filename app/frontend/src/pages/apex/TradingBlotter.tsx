@@ -4,6 +4,8 @@ import { DataTable, Panel } from '@/components/primitives';
 import { PriceTicker } from '@/components/trading';
 import { useExposureHeatmap, useInstrumentQuote, useMarketInstruments, useMarketTradeBlotter, usePositions } from '@/api/hooks/apex';
 import { useTradingStore } from '@/store/tradingStore';
+import { Tooltip } from '@/components/Tooltip';
+import { getMetricInfo } from '@/config/dataDictionary';
 
 type BlotterRow = {
   trade_id: string;
@@ -27,12 +29,33 @@ export function TradingBlotter(): JSX.Element {
 
   const columns = useMemo<ColumnDef<BlotterRow>[]>(
     () => [
-      { header: 'Trade ID', accessorKey: 'trade_id' },
-      { header: 'Instrument', accessorKey: 'instrument' },
-      { header: 'Direction', accessorKey: 'direction' },
-      { header: 'MW', accessorKey: 'volume_mw', meta: { kind: 'mw' } },
-      { header: 'Price', accessorKey: 'price', meta: { kind: 'price' } },
-      { header: 'MTM', accessorKey: 'mtm_pnl', meta: { kind: 'price' } },
+      {
+        header: () => <Tooltip {...getMetricInfo('trade_id')!}>Trade ID</Tooltip>,
+        accessorKey: 'trade_id'
+      },
+      {
+        header: () => <Tooltip {...getMetricInfo('instrument_id')!}>Instrument</Tooltip>,
+        accessorKey: 'instrument'
+      },
+      {
+        header: () => <Tooltip {...getMetricInfo('direction')!}>Direction</Tooltip>,
+        accessorKey: 'direction'
+      },
+      {
+        header: () => <Tooltip {...getMetricInfo('volume_mw')!}>MW</Tooltip>,
+        accessorKey: 'volume_mw',
+        meta: { kind: 'mw' }
+      },
+      {
+        header: () => <Tooltip {...getMetricInfo('price')!}>Price</Tooltip>,
+        accessorKey: 'price',
+        meta: { kind: 'price' }
+      },
+      {
+        header: () => <Tooltip title="Mark-to-Market P&L" description="Unrealized profit/loss on open positions valued at current market prices" table="apex_fresh.trading.trades">MTM</Tooltip>,
+        accessorKey: 'mtm_pnl',
+        meta: { kind: 'price' }
+      },
     ],
     [],
   );

@@ -2,10 +2,12 @@ import { useMemo } from 'react';
 import { DataTable, Panel } from '@/components/primitives';
 import { useBacktestStrategies, useBacktests, useForecastMetadata, useModelLineage, useModelPerformance, usePredispatch, useBacktestResults } from '@/api/hooks/apex';
 import { useTradingStore } from '@/store/tradingStore';
-import { WeatherImpact, VolumeForecast, ProductionForecast } from '@/components/forecasting';
-import { StrategyDashboard, BacktestResults, LiveStrategyMonitor, AgentCollaboration } from '@/components/strategies';
-import { DataFreshness, IngestionLogs, DataQuality } from '@/components/nemweb';
-import { PriceChart, ForecastAccuracyChart, PriceAlerts, StrategyComparisonChart, RiskHeatmap } from '@/components/charts';
+// import { WeatherImpact, VolumeForecast, ProductionForecast } from '@/components/forecasting';
+// import { StrategyDashboard, BacktestResults, LiveStrategyMonitor, AgentCollaboration } from '@/components/strategies';
+// import { DataFreshness, IngestionLogs, DataQuality } from '@/components/nemweb';
+// import { PriceChart, ForecastAccuracyChart, PriceAlerts, StrategyComparisonChart, RiskHeatmap } from '@/components/charts';
+import { Tooltip } from '@/components/Tooltip';
+import { getMetricInfo } from '@/config/dataDictionary';
 
 export function QuantConsole(): JSX.Element {
   const market = useTradingStore((s) => s.market);
@@ -51,47 +53,91 @@ export function QuantConsole(): JSX.Element {
   return (
     <div style={{ display: 'grid', gap: 'var(--space-3)' }}>
       {/* Phase 4: Advanced Analytics & Visualization - Market Data */}
-      <PriceChart regionId={regionId} days={30} />
-      <ForecastAccuracyChart regionId={regionId} days={30} />
-      <PriceAlerts regionId={regionId} days={7} />
+      {/* <PriceChart regionId={regionId} days={30} /> */}
+      {/* <ForecastAccuracyChart regionId={regionId} days={30} /> */}
+      {/* <PriceAlerts regionId={regionId} days={7} /> */}
 
       {/* Phase 4: Advanced Analytics & Visualization - Strategy Analysis */}
-      <StrategyComparisonChart strategyType={null} limit={10} />
+      {/* <StrategyComparisonChart strategyType={null} limit={10} /> */}
 
       {/* Phase 4: Advanced Analytics & Visualization - Risk Management */}
-      <RiskHeatmap market={market} spotPrice={100} volatility={25} />
+      {/* <RiskHeatmap market={market} spotPrice={100} volatility={25} /> */}
 
       {/* Phase 1: Forecasting & Predictive Analytics */}
-      <VolumeForecast regionId={regionId} days={15} />
-      <WeatherImpact regionId={regionId} days={7} />
-      <ProductionForecast regionId={regionId} days={7} />
+      {/* <VolumeForecast regionId={regionId} days={15} /> */}
+      {/* <WeatherImpact regionId={regionId} days={7} /> */}
+      {/* <ProductionForecast regionId={regionId} days={7} /> */}
 
       {/* Phase 2: Strategy Development with Agents */}
-      <StrategyDashboard />
-      <BacktestResults />
-      <LiveStrategyMonitor />
-      <AgentCollaboration />
+      {/* <StrategyDashboard /> */}
+      {/* <BacktestResults /> */}
+      {/* <LiveStrategyMonitor /> */}
+      {/* <AgentCollaboration /> */}
 
       {/* Phase 3: NEMWEB Data Ingestion & Monitoring */}
-      <DataFreshness />
-      <IngestionLogs />
-      <DataQuality />
+      {/* <DataFreshness /> */}
+      {/* <IngestionLogs /> */}
+      {/* <DataQuality /> */}
 
       {/* Existing Analytics */}
       <Panel persona="quant" title="Model Performance" subtitle="Champion vs challenger">
-        <DataTable data={models.data ?? []} columns={[{ header: 'Model', accessorKey: 'model_name' }, { header: 'MAPE', accessorKey: 'mape', meta: { kind: 'pct' } }, { header: 'RMSE', accessorKey: 'rmse', meta: { kind: 'price' } }, { header: 'R2', accessorKey: 'r2', meta: { kind: 'pct' } }]} />
+        <DataTable
+          data={models.data ?? []}
+          columns={[
+            {
+              header: () => <Tooltip {...getMetricInfo('model_name')!}>Model</Tooltip>,
+              accessorKey: 'model_name'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('mape')!}>MAPE</Tooltip>,
+              accessorKey: 'mape',
+              meta: { kind: 'pct' }
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('rmse')!}>RMSE</Tooltip>,
+              accessorKey: 'rmse',
+              meta: { kind: 'price' }
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('r2')!}>R²</Tooltip>,
+              accessorKey: 'r2',
+              meta: { kind: 'pct' }
+            },
+          ]}
+        />
       </Panel>
       <Panel persona="quant" title="Model Lineage" subtitle="Run provenance · training window · feature signature">
         <DataTable
           data={lineage.data ?? []}
           columns={[
-            { header: 'Market', accessorKey: 'market' },
-            { header: 'Model', accessorKey: 'model_name' },
-            { header: 'Last Run (UTC)', accessorKey: 'run_timestamp' },
-            { header: 'Train Start (UTC)', accessorKey: 'training_start_utc' },
-            { header: 'Train End (UTC)', accessorKey: 'training_end_utc' },
-            { header: 'Feature Hash', accessorKey: 'feature_hash' },
-            { header: 'Feature Set', accessorKey: 'feature_set' },
+            {
+              header: () => <Tooltip {...getMetricInfo('market')!}>Market</Tooltip>,
+              accessorKey: 'market'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('model_name')!}>Model</Tooltip>,
+              accessorKey: 'model_name'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('run_timestamp')!}>Last Run (UTC)</Tooltip>,
+              accessorKey: 'run_timestamp'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('training_start')!}>Train Start (UTC)</Tooltip>,
+              accessorKey: 'training_start_utc'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('training_end')!}>Train End (UTC)</Tooltip>,
+              accessorKey: 'training_end_utc'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('feature_hash')!}>Feature Hash</Tooltip>,
+              accessorKey: 'feature_hash'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('feature_set')!}>Feature Set</Tooltip>,
+              accessorKey: 'feature_set'
+            },
           ]}
         />
       </Panel>
@@ -127,8 +173,43 @@ export function QuantConsole(): JSX.Element {
         <svg width="100%" height="86" viewBox="0 0 100 72" style={{ marginBottom: 8 }}>
           <polyline fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.4" points={chartPath} />
           <polyline fill="none" stroke="var(--color-persona-quant)" strokeWidth="1.4" strokeDasharray="2,2" points={forecastPath} />
+          {/* Legend */}
+          <g transform="translate(5, 5)">
+            <line x1="0" y1="0" x2="8" y2="0" stroke="var(--color-text-secondary)" strokeWidth="1.4" />
+            <text x="10" y="4" fontSize="8" fill="var(--color-text-tertiary)" fontFamily="var(--font-ui)">Actual</text>
+            <line x1="35" y1="0" x2="43" y2="0" stroke="var(--color-persona-quant)" strokeWidth="1.4" strokeDasharray="2,2" />
+            <text x="45" y="4" fontSize="8" fill="var(--color-text-tertiary)" fontFamily="var(--font-ui)">Forecast</text>
+          </g>
         </svg>
-        <DataTable data={backtests.data ?? []} columns={[{ header: 'Strategy', accessorKey: 'strategy' }, { header: 'Trades', accessorKey: 'trades', meta: { kind: 'mw' } }, { header: 'Win Rate', accessorKey: 'win_rate', meta: { kind: 'pct' } }, { header: 'Total PnL', accessorKey: 'total_pnl', meta: { kind: 'price' } }, { header: 'Sharpe', accessorKey: 'sharpe', meta: { kind: 'pct' } }]} />
+        <DataTable
+          data={backtests.data ?? []}
+          columns={[
+            {
+              header: () => <Tooltip {...getMetricInfo('strategy')!}>Strategy</Tooltip>,
+              accessorKey: 'strategy'
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('trades')!}>Trades</Tooltip>,
+              accessorKey: 'trades',
+              meta: { kind: 'mw' }
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('win_rate')!}>Win Rate</Tooltip>,
+              accessorKey: 'win_rate',
+              meta: { kind: 'pct' }
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('total_pnl')!}>Total PnL</Tooltip>,
+              accessorKey: 'total_pnl',
+              meta: { kind: 'price' }
+            },
+            {
+              header: () => <Tooltip {...getMetricInfo('sharpe')!}>Sharpe</Tooltip>,
+              accessorKey: 'sharpe',
+              meta: { kind: 'pct' }
+            },
+          ]}
+        />
       </Panel>
     </div>
   );
