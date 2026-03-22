@@ -548,6 +548,16 @@ class NEMWEBIngestionService:
     ):
         """Log ingestion job to database"""
         try:
+            # Prepare end_timestamp value
+            end_ts_value = f"TIMESTAMP'{end_timestamp}'" if end_timestamp else 'NULL'
+
+            # Prepare error_message value
+            if error_message:
+                escaped_error = error_message.replace("'", "''")
+                error_value = f"'{escaped_error}'"
+            else:
+                error_value = 'NULL'
+
             sql = f"""
             INSERT INTO {self.catalog}.nemweb.ingestion_log
             (log_id, data_type, date_loaded, region_id, records_loaded, records_failed,
@@ -560,10 +570,10 @@ class NEMWEBIngestionService:
                 {records_loaded},
                 {records_failed},
                 TIMESTAMP'{start_timestamp}',
-                {'TIMESTAMP\'' + str(end_timestamp) + '\'' if end_timestamp else 'NULL'},
+                {end_ts_value},
                 {duration_seconds if duration_seconds else 'NULL'},
                 '{status}',
-                {'\'' + error_message.replace("'", "''") + '\'' if error_message else 'NULL'}
+                {error_value}
             )
             """
             await execute_sql(sql)
