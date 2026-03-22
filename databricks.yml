@@ -1,20 +1,106 @@
 bundle:
-  name: nexus-energy-trading-app
+  name: apex-etrm
 
 workspace:
-  host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+  host: https://e2-demo-field-eng.cloud.databricks.com/
 
 targets:
   dev:
     default: true
     workspace:
-      host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+      host: https://e2-demo-field-eng.cloud.databricks.com/
   prod:
     workspace:
-      host: https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com/
+      host: https://e2-demo-field-eng.cloud.databricks.com/
 
 resources:
   apps:
-    nexus_energy_trading_app:
-      name: nexus-energy-trading-app
+    apex_etrm:
+      name: apex-etrm
       source_code_path: .
+
+  jobs:
+    apex_nemweb_realtime:
+      name: APEX - NEMWEB Real-Time Ingestion
+      description: Ingests 5-minute dispatch prices from NEMWEB every 5 minutes
+      schedule:
+        quartz_cron_expression: "0 0/5 * * * ?"
+        timezone_id: "Australia/Sydney"
+        pause_status: UNPAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 600
+      tasks:
+        - task_key: ingest_nemweb_prices
+          python_wheel_task:
+            package_name: jobs
+            entry_point: nemweb_real_time
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 0
+            spark_conf:
+              spark.databricks.cluster.profile: singleNode
+              spark.master: local[*]
+            custom_tags:
+              ResourceClass: SingleNode
+          libraries:
+            - pypi:
+                package: httpx
+            - pypi:
+                package: pandas
+
+    apex_epex_dayahead:
+      name: APEX - EPEX Day-Ahead Ingestion
+      description: Ingests day-ahead auction prices from ENTSOE daily at 14:00 UTC
+      schedule:
+        quartz_cron_expression: "0 0 14 * * ?"
+        timezone_id: "Europe/Berlin"
+        pause_status: UNPAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 1200
+      tasks:
+        - task_key: ingest_epex_prices
+          spark_python_task:
+            python_file: jobs/ingestion/epex_day_ahead.py
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 0
+            spark_conf:
+              spark.databricks.cluster.profile: singleNode
+              spark.master: local[*]
+            custom_tags:
+              ResourceClass: SingleNode
+          libraries:
+            - pypi:
+                package: httpx
+            - pypi:
+                package: pandas
+
+    apex_ercot_realtime:
+      name: APEX - ERCOT Real-Time Ingestion
+      description: Ingests 5-minute Settlement Point Prices from ERCOT every 5 minutes
+      schedule:
+        quartz_cron_expression: "0 0/5 * * * ?"
+        timezone_id: "America/Chicago"
+        pause_status: UNPAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 600
+      tasks:
+        - task_key: ingest_ercot_prices
+          spark_python_task:
+            python_file: jobs/ingestion/ercot_real_time.py
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 0
+            spark_conf:
+              spark.databricks.cluster.profile: singleNode
+              spark.master: local[*]
+            custom_tags:
+              ResourceClass: SingleNode
+          libraries:
+            - pypi:
+                package: httpx
+            - pypi:
+                package: pandas
