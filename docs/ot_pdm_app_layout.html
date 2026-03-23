@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OT PdM Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --db-red:#FF3621; --db-navy:#1B2431; --bg:#F0F2F5; --card:#fff;
+  --border:#E2E8F0; --text:#1B2431; --muted:#64748B;
+  --green:#16A34A; --amber:#D97706; --red:#DC2626;
+  --green-bg:#F0FDF4; --amber-bg:#FFFBEB; --red-bg:#FEF2F2;
+  --green-lt:#DCFCE7; --amber-lt:#FEF3C7; --red-lt:#FEE2E2;
+  --sidebar:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+/* ── TOP BAR ── */
+.topbar{background:var(--db-navy);color:#fff;padding:0 16px 0 calc(var(--sidebar)+16px);display:flex;align-items:center;gap:14px;height:52px;flex-shrink:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;}
+.logo-text{font-size:14px;font-weight:600;letter-spacing:-.3px;}
+.topbar-div{width:1px;height:20px;background:rgba(255,255,255,.18);}
+.app-name{font-size:13px;color:rgba(255,255,255,.6);}
+.ind-tabs{display:flex;gap:2px;margin-left:auto;}
+.itab{padding:6px 14px;border-radius:4px;font-size:12px;cursor:pointer;color:rgba(255,255,255,.5);border:none;background:transparent;font-family:inherit;transition:all .15s;}
+.itab.active{background:var(--db-red);color:#fff;font-weight:500;}
+.itab:not(.active):hover{background:rgba(255,255,255,.1);color:#fff;}
+.isa-badge{font-size:10px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.15);padding:2px 7px;border-radius:3px;font-family:'IBM Plex Mono',monospace;margin-left:12px;white-space:nowrap;}
+/* ── BODY LAYOUT ── */
+.body-wrap{display:flex;flex:1;overflow:hidden;}
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--db-navy);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:4px;flex-shrink:0;border-right:1px solid rgba(255,255,255,.07);}
+.nav-btn{width:40px;height:40px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.4);border:none;background:transparent;gap:3px;transition:all .15s;position:relative;}
+.nav-btn svg{width:18px;height:18px;flex-shrink:0;}
+.nav-btn span{font-size:8px;letter-spacing:.2px;line-height:1;}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);}
+.nav-btn.active{background:rgba(255,54,33,.25);color:var(--db-red);}
+.nav-sep{width:28px;height:1px;background:rgba(255,255,255,.1);margin:4px 0;}
+/* ── PAGES ── */
+.page{display:none;flex:1;overflow:hidden;flex-direction:column;}
+.page.active{display:flex;}
+/* ── KPI STRIP ── */
+.kpi-strip{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;display:flex;overflow-x:auto;flex-shrink:0;}
+.kpi{padding:10px 20px;border-right:1px solid var(--border);flex-shrink:0;}
+.kpi:first-child{padding-left:0;}
+.kpi-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:500;margin-bottom:2px;white-space:nowrap;}
+.kpi-v{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:500;line-height:1;margin-bottom:1px;}
+.kpi-v.g{color:var(--green);} .kpi-v.a{color:var(--amber);} .kpi-v.r{color:var(--red);}
+.kpi-d{font-size:11px;color:var(--muted);white-space:nowrap;}
+/* ── FLEET OVERVIEW (P1) ── */
+.p1-main{display:grid;grid-template-columns:1fr 380px;flex:1;overflow:hidden;}
+.asset-panel{padding:14px 16px;border-right:1px solid var(--border);overflow-y:auto;background:var(--bg);}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.panel-title{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.chips{display:flex;gap:5px;}
+.chip{padding:2px 9px;border-radius:20px;font-size:11px;border:1px solid var(--border);cursor:pointer;color:var(--muted);background:#fff;font-family:inherit;}
+.chip.active{border-color:var(--db-red);color:var(--db-red);background:#FFF5F3;}
+.asset-grid{display:flex;flex-direction:column;gap:8px;}
+.asset-card{background:#fff;border:1px solid var(--border);border-left:3px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:box-shadow .15s;}
+.asset-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.asset-card.warning{border-left-color:var(--amber);}
+.asset-card.critical{border-left-color:var(--red);}
+.asset-card.healthy{border-left-color:var(--green);}
+.card-top{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.hring{position:relative;width:46px;height:46px;flex-shrink:0;}
+.hpct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;}
+.ai{flex:1;min-width:0;}
+.aid{font-size:15px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.atype{font-size:11px;color:var(--muted);margin-bottom:1px;}
+.acrumb{font-size:10px;color:#94A3B8;}
+.sbadge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:500;flex-shrink:0;}
+.sbadge.healthy{background:var(--green-lt);color:var(--green);}
+.sbadge.warning{background:var(--amber-lt);color:var(--amber);}
+.sbadge.critical{background:var(--red-lt);color:var(--red);}
+.card-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.cm{background:#F8FAFC;border-radius:5px;padding:6px 8px;}
+.cml{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
+.cmv{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;}
+/* ── AGENT PANEL ── */
+.agent-panel{display:flex;flex-direction:column;background:#fff;}
+.agent-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.adot{width:7px;height:7px;background:var(--green);border-radius:50%;flex-shrink:0;}
+.atitle{font-size:12px;font-weight:500;}
+.asubt{font-size:10px;color:var(--muted);margin-top:1px;}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;}
+.msg{display:flex;gap:8px;align-items:flex-start;}
+.av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;margin-top:1px;}
+.av.user{background:var(--db-navy);color:#fff;}
+.av.agent{background:var(--db-red);color:#fff;}
+.bubble{background:#F8FAFC;border-radius:7px;border-top-left-radius:2px;padding:9px 11px;font-size:12px;line-height:1.55;max-width:calc(100% - 36px);}
+.bubble.user{background:#EFF6FF;border-top-left-radius:7px;border-top-right-radius:2px;}
+.bubble-lbl{font-size:10px;font-weight:600;color:var(--db-navy);margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;}
+.bubble p{margin-bottom:6px;} .bubble p:last-child{margin-bottom:0;}
+.rtag{display:inline-block;background:var(--amber-lt);color:var(--amber);font-size:9px;font-weight:500;padding:2px 6px;border-radius:3px;margin-bottom:4px;font-family:'IBM Plex Mono',monospace;}
+.chl{background:var(--red-bg);border-left:3px solid var(--red);padding:6px 9px;border-radius:4px;font-size:11px;margin-top:6px;}
+.agent-inp{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;}
+.ainput{flex:1;border:1px solid var(--border);border-radius:5px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:#fff;}
+.ainput:focus{border-color:var(--db-red);box-shadow:0 0 0 2px rgba(255,54,33,.1);}
+.sbtn{background:var(--db-red);color:#fff;border:none;border-radius:5px;padding:7px 14px;font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;}
+/* ── ALERT BAR ── */
+.alert-bar{background:#fff;border-top:1px solid var(--border);padding:10px 20px;max-height:130px;overflow-y:auto;flex-shrink:0;}
+.alert-hdr{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.arows{display:flex;flex-direction:column;gap:5px;}
+.arow{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:4px;font-size:11px;}
+.arow.critical{background:var(--red-bg);} .arow.warning{background:var(--amber-bg);} .arow.info{background:var(--green-bg);}
+.apip{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.apip.critical{background:var(--red);} .apip.warning{background:var(--amber);} .apip.info{background:var(--green);}
+.atext{flex:1;} .atime{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* ── PAGE 2: ASSET DRILLDOWN ── */
+.p2-wrap{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+.p2-hdr{display:flex;align-items:center;gap:12px;}
+.back-btn{padding:5px 12px;border:1px solid var(--border);border-radius:5px;font-size:12px;cursor:pointer;background:#fff;font-family:inherit;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.back-btn:hover{background:var(--bg);}
+.p2-meta{flex:1;}
+.p2-id{font-size:22px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.p2-type{font-size:12px;color:var(--muted);}
+.p2-crumb{font-size:10px;color:#94A3B8;margin-top:2px;}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.sc-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.sc-val{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:500;line-height:1;margin-bottom:2px;}
+.sc-sub{font-size:11px;color:var(--muted);}
+.sensor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.sensor-tile{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.sensor-tile.anomalous{border-color:var(--red);background:#FFFAFA;}
+.sensor-tile.warning{border-color:var(--amber);background:#FFFDF5;}
+.st-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.st-name{font-size:11px;font-weight:500;color:var(--text);}
+.st-unit{font-size:10px;color:var(--muted);}
+.st-val{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:500;margin-bottom:2px;}
+.st-trend{font-size:10px;color:var(--muted);}
+.sparkline-wrap{height:40px;margin-top:6px;}
+.anomaly-timeline{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.sect-title{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.timeline-chart{height:100px;}
+
+/* ── PAGE 3: HIERARCHY ── */
+.p3-wrap{display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden;}
+.tree-panel{border-right:1px solid var(--border);overflow-y:auto;padding:14px;}
+.tree-hdr{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.tree-node{cursor:pointer;user-select:none;}
+.tn-row{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:5px;transition:background .1s;}
+.tn-row:hover{background:#F1F5F9;}
+.tn-row.selected{background:#FFF5F3;}
+.tn-chevron{width:12px;height:12px;flex-shrink:0;color:var(--muted);transition:transform .15s;}
+.tn-chevron.open{transform:rotate(90deg);}
+.tn-chevron.leaf{opacity:0;}
+.tn-icon{width:14px;height:14px;flex-shrink:0;}
+.tn-label{font-size:12px;flex:1;}
+.tn-badge{padding:1px 6px;border-radius:10px;font-size:10px;font-weight:500;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+.tn-children{padding-left:18px;overflow:hidden;}
+.detail-panel{overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+.node-detail-hdr{display:flex;align-items:center;gap:12px;}
+.nd-icon-wrap{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nd-name{font-size:18px;font-weight:600;}
+.nd-level{font-size:11px;color:var(--muted);margin-top:1px;}
+.nd-path{font-size:10px;color:#94A3B8;margin-top:2px;}
+.health-breakdown{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.hb-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9;}
+.hb-row:last-child{border-bottom:none;}
+.hb-label{font-size:12px;flex:1;}
+.hb-bar-wrap{width:140px;height:6px;background:#F1F5F9;border-radius:3px;flex-shrink:0;}
+.hb-bar{height:6px;border-radius:3px;}
+.hb-pct{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;width:36px;text-align:right;flex-shrink:0;}
+.children-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;}
+.child-card{background:#fff;border:1px solid var(--border);border-radius:7px;padding:10px 12px;cursor:pointer;}
+.child-card:hover{box-shadow:0 1px 6px rgba(0,0,0,.06);}
+.cc-id{font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace;margin-bottom:2px;}
+.cc-type{font-size:11px;color:var(--muted);}
+.cc-health{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;margin-top:6px;}
+
+/* ── PAGE 4: SENSOR STREAM ── */
+.p4-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.stream-controls{background:#fff;border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.sc-live{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.sc-select{border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:12px;font-family:inherit;background:#fff;color:var(--text);outline:none;}
+.sc-count{margin-left:auto;font-size:11px;color:var(--muted);}
+.stream-table-wrap{flex:1;overflow-y:auto;}
+.stream-table{width:100%;border-collapse:collapse;font-size:12px;}
+.stream-table th{background:#fff;padding:8px 12px;text-align:left;font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;}
+.stream-table td{padding:7px 12px;border-bottom:1px solid #F8FAFC;vertical-align:middle;}
+.stream-table tr.bad td{background:#FEF2F2;}
+.stream-table tr.uncertain td{background:#FFFBEB;}
+.stream-table tr.new td{animation:fadeIn .4s ease-out;}
+@keyframes fadeIn{from{background:#EFF6FF;}to{}}
+.tag-name{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);}
+.val-cell{font-family:'IBM Plex Mono',monospace;font-weight:500;}
+.q-badge{padding:2px 7px;border-radius:3px;font-size:10px;font-weight:500;}
+.q-badge.good{background:var(--green-lt);color:var(--green);}
+.q-badge.bad{background:var(--red-lt);color:var(--red);}
+.q-badge.uncertain{background:var(--amber-lt);color:var(--amber);}
+.proto-badge{padding:2px 6px;border-radius:3px;font-size:10px;font-family:'IBM Plex Mono',monospace;}
+.proto-badge.opcua{background:#EEF2FF;color:#4338CA;}
+.proto-badge.mqtt{background:#F0FDF4;color:#166534;}
+.proto-badge.modbus{background:#FFF7ED;color:#9A3412;}
+.ts-cell{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);}
+
+/* ── PAGE 5: MODEL EXPLAINABILITY ── */
+.p5-wrap{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px;}
+.p5-asset-sel{display:flex;align-items:center;gap:10px;}
+.p5-label{font-size:12px;color:var(--muted);}
+.p5-select{border:1px solid var(--border);border-radius:5px;padding:6px 10px;font-size:13px;font-family:'IBM Plex Mono',monospace;background:#fff;outline:none;}
+.p5-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.chart-card.full{grid-column:1/-1;}
+.cc-title{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.rul-stats{display:flex;gap:20px;margin-bottom:10px;}
+.rul-stat{display:flex;flex-direction:column;}
+.rul-stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.rul-stat-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:500;}
+.chart-h-200{height:200px;}
+.chart-h-160{height:160px;}
+.anomaly-decomp{display:flex;flex-direction:column;gap:8px;}
+.ad-row{display:flex;align-items:center;gap:8px;}
+.ad-name{font-size:11px;flex:1;color:var(--text);}
+.ad-bar-wrap{width:120px;height:8px;background:#F1F5F9;border-radius:4px;flex-shrink:0;}
+.ad-bar{height:8px;border-radius:4px;background:var(--db-red);}
+.ad-score{font-family:'IBM Plex Mono',monospace;font-size:11px;width:36px;text-align:right;color:var(--muted);}
+.model-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mm-item{background:#F8FAFC;border-radius:5px;padding:8px 10px;}
+.mm-label{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.mm-val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <svg width="24" height="24" viewBox="0 0 26 26" fill="none">
+      <polygon points="13,1 24,7 24,19 13,25 2,19 2,7" fill="#FF3621"/>
+      <polygon points="13,6 20,10 20,18 13,22 6,18 6,10" fill="rgba(0,0,0,.25)"/>
+      <polygon points="13,10 17,12 17,17 13,19 9,17 9,12" fill="rgba(255,255,255,.35)"/>
+    </svg>
+    <span class="logo-text">Databricks</span>
+  </div>
+  <div class="topbar-div"></div>
+  <span class="app-name">OT PdM Intelligence</span>
+  <div class="ind-tabs">
+    <button class="itab active" onclick="switchInd('mining')">Mining</button>
+    <button class="itab" onclick="switchInd('energy')">Energy</button>
+    <button class="itab" onclick="switchInd('aviation')">Aviation</button>
+    <button class="itab" onclick="switchInd('automotive')">Automotive</button>
+  </div>
+  <span class="isa-badge">ISA-95 &middot; Unity Catalog</span>
+</div>
+
+<div class="body-wrap">
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <button class="nav-btn active" onclick="goPage('p1')" title="Fleet Overview">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+    <span>Fleet</span>
+  </button>
+  <button class="nav-btn" onclick="goPage('p2')" title="Asset Drilldown">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="8" r="5"/><path d="M10 13v5M7 18h6" stroke-linecap="round"/></svg>
+    <span>Asset</span>
+  </button>
+  <button class="nav-btn" onclick="goPage('p3')" title="ISA-95 Hierarchy">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2v4M5 9H2v4h3M18 9h-3v4h3M10 6v3M5 11h5M10 9h5" stroke-linecap="round"/><rect x="7" y="13" width="6" height="5" rx="1"/></svg>
+    <span>Hier.</span>
+  </button>
+  <button class="nav-btn" onclick="goPage('p4')" title="Sensor Stream">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10h16M2 5h10M2 15h14" stroke-linecap="round"/><circle cx="16" cy="10" r="1.5" fill="currentColor" stroke="none"/></svg>
+    <span>Stream</span>
+  </button>
+  <div class="nav-sep"></div>
+  <button class="nav-btn" onclick="goPage('p5')" title="Model Explainability">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 16L7 10l4 3 3-6 3 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Model</span>
+  </button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 1: FLEET OVERVIEW
+══════════════════════════════════════════════════════ -->
+<div class="page active" id="p1">
+  <div class="kpi-strip" id="kpi1"></div>
+  <div class="p1-main">
+    <div class="asset-panel">
+      <div class="panel-hdr">
+        <span class="panel-title" id="pt1"></span>
+        <div class="chips">
+          <button class="chip active">All</button>
+          <button class="chip">Critical</button>
+          <button class="chip">Warning</button>
+        </div>
+      </div>
+      <div class="asset-grid" id="ag1"></div>
+    </div>
+    <div class="agent-panel">
+      <div class="agent-hdr">
+        <div class="adot"></div>
+        <div><div class="atitle" id="at1"></div><div class="asubt" id="as1"></div></div>
+      </div>
+      <div class="msgs" id="msgs1"></div>
+      <div class="agent-inp">
+        <input class="ainput" type="text" id="ai1">
+        <button class="sbtn">Send</button>
+      </div>
+    </div>
+  </div>
+  <div class="alert-bar">
+    <div class="alert-hdr">Recent alerts</div>
+    <div class="arows" id="alr1"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 2: ASSET DRILLDOWN
+══════════════════════════════════════════════════════ -->
+<div class="page" id="p2">
+  <div class="p2-wrap">
+    <div class="p2-hdr">
+      <button class="back-btn" onclick="goPage('p1')">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Fleet
+      </button>
+      <div class="p2-meta">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="p2-id" id="p2-id">HT-012</div>
+          <span class="sbadge critical" id="p2-badge">Critical</span>
+        </div>
+        <div class="p2-type" id="p2-type">Cat 793F Haul Truck</div>
+        <div class="p2-crumb" id="p2-crumb">Pilbara Ops › Pit 1N › Haul Fleet › HT-012</div>
+      </div>
+    </div>
+
+    <div class="stat-cards" id="p2-stats"></div>
+
+    <div>
+      <div class="sect-title">Sensor readings &mdash; live</div>
+      <div class="sensor-grid" id="p2-sensors"></div>
+    </div>
+
+    <div class="anomaly-timeline">
+      <div class="sect-title">Anomaly score &mdash; 72h history</div>
+      <div class="timeline-chart"><canvas id="anomaly-chart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 3: ISA-95 HIERARCHY
+══════════════════════════════════════════════════════ -->
+<div class="page" id="p3">
+  <div class="p3-wrap">
+    <div class="tree-panel">
+      <div class="tree-hdr">Asset hierarchy</div>
+      <div id="tree-root"></div>
+    </div>
+    <div class="detail-panel" id="p3-detail">
+      <div style="color:var(--muted);font-size:13px;margin-top:40px;text-align:center;">Select a node in the tree to view details</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 4: SENSOR STREAM
+══════════════════════════════════════════════════════ -->
+<div class="page" id="p4">
+  <div class="p4-wrap">
+    <div class="stream-controls">
+      <div class="sc-live"><div class="live-dot"></div>Live stream</div>
+      <select class="sc-select" id="stream-asset-filter">
+        <option value="">All assets</option>
+      </select>
+      <select class="sc-select" id="stream-quality-filter">
+        <option value="">All quality</option>
+        <option value="good">Good only</option>
+        <option value="bad">Bad only</option>
+        <option value="uncertain">Uncertain only</option>
+      </select>
+      <select class="sc-select" id="stream-proto-filter">
+        <option value="">All protocols</option>
+        <option value="OPC-UA">OPC-UA</option>
+        <option value="MQTT">MQTT</option>
+        <option value="Modbus">Modbus</option>
+      </select>
+      <span class="sc-count" id="stream-count">0 readings</span>
+    </div>
+    <div class="stream-table-wrap">
+      <table class="stream-table">
+        <thead><tr>
+          <th>Timestamp</th>
+          <th>Asset</th>
+          <th>Tag name</th>
+          <th>Value</th>
+          <th>Unit</th>
+          <th>Quality</th>
+          <th>Protocol</th>
+        </tr></thead>
+        <tbody id="stream-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 5: MODEL EXPLAINABILITY
+══════════════════════════════════════════════════════ -->
+<div class="page" id="p5">
+  <div class="p5-wrap">
+    <div class="p5-asset-sel">
+      <span class="p5-label">Asset</span>
+      <select class="p5-select" id="p5-asset-sel" onchange="renderP5()"></select>
+    </div>
+    <div class="model-meta" id="p5-meta"></div>
+    <div class="p5-grid">
+      <div class="chart-card full">
+        <div class="cc-title">RUL degradation curve</div>
+        <div class="rul-stats" id="p5-rul-stats"></div>
+        <div class="chart-h-200"><canvas id="rul-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="cc-title">Feature importance — anomaly model</div>
+        <div class="chart-h-160"><canvas id="feat-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="cc-title">Anomaly score decomposition</div>
+        <div class="anomaly-decomp" id="p5-decomp"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end body-wrap -->
+
+<script>
+// ══════════════════════════════
+// DATA
+// ══════════════════════════════
+const SKINS = {
+  mining: {
+    panelTitle:"Haul Fleet · Pilbara Operations",
+    agentTitle:"Maintenance Supervisor AI",
+    agentSubtitle:"Rio Tinto Gudai-Darri · Pilbara Operations",
+    agentPlaceholder:"Ask about fleet, maintenance, parts...",
+    kpis:[
+      {l:"Fleet availability",v:"94.2%",c:"g",d:"+1.3% vs last week"},
+      {l:"Active alerts",v:"3",c:"a",d:"2 warning · 1 critical"},
+      {l:"Avg fleet health",v:"71.0%",c:"",d:"across 12 assets"},
+      {l:"Predicted failures 24h",v:"1",c:"r",d:"HT-012 · engine"},
+      {l:"Production at risk",v:"$42K",c:"",d:"if HT-012 not serviced"}
+    ],
+    assets:[
+      {id:"HT-012",type:"Cat 793F Haul Truck",status:"critical",health:31,
+       crumb:"Pilbara Ops › Pit 1N › Haul Fleet › HT-012",
+       metrics:[{l:"RUL (h)",v:"23",c:"#DC2626"},{l:"EGT",v:"108°C",c:"#DC2626"},{l:"Anomaly",v:"0.94",c:"#DC2626"}],
+       sensors:[
+         {name:"engine_egt",label:"Exhaust gas temp",val:108,unit:"°C",status:"critical",trend:"+3.2/h",history:[88,91,93,95,98,100,103,108]},
+         {name:"coolant_temp",label:"Coolant temp",val:104,unit:"°C",status:"warning",trend:"+1.8/h",history:[85,87,88,90,93,97,101,104]},
+         {name:"oil_temp",label:"Engine oil temp",val:112,unit:"°C",status:"critical",trend:"+2.1/h",history:[90,93,95,98,102,106,109,112]},
+         {name:"vibration_rms",label:"Drivetrain vibration",val:4.1,unit:"mm/s",status:"healthy",trend:"+0.1/h",history:[3.2,3.3,3.4,3.5,3.7,3.8,4.0,4.1]},
+         {name:"tyre_fl",label:"Tyre pressure FL",val:718,unit:"kPa",status:"healthy",trend:"stable",history:[720,719,721,720,718,719,720,718]},
+         {name:"fuel_rate",label:"Fuel consumption",val:148,unit:"L/hr",status:"warning",trend:"+2/h",history:[118,122,128,133,138,142,145,148]},
+       ],
+       anomalyHistory:[0.12,0.14,0.18,0.22,0.31,0.45,0.62,0.71,0.78,0.82,0.87,0.91,0.94],
+       rul:{current:23,initial:2000,predicted:["2000","1850","1600","1200","800","400","150","23"],labels:["T-7d","T-6d","T-5d","T-4d","T-3d","T-2d","T-1d","Now"],failurePct:0.94},
+       features:[{name:"engine_egt",score:0.38},{name:"oil_temp",score:0.29},{name:"coolant_temp",score:0.19},{name:"fuel_rate",score:0.09},{name:"vibration",score:0.05}],
+       decomp:[{name:"engine_egt",score:0.41},{name:"oil_temp",score:0.31},{name:"coolant_temp",score:0.15},{name:"fuel_rate",score:0.08},{name:"vibration_rms",score:0.05}],
+       model:{trained:"2026-03-18",accuracy:"93.2%",rmse:"18.4h",protocol:"OPC-UA"}
+      },
+      {id:"HT-007",type:"Cat 793F Haul Truck",status:"warning",health:68,
+       crumb:"Pilbara Ops › Pit 3W › Haul Fleet › HT-007",
+       metrics:[{l:"RUL (h)",v:"127",c:"#D97706"},{l:"Vib.",v:"6.2mm/s",c:"#D97706"},{l:"Anomaly",v:"0.72",c:"#D97706"}],
+       sensors:[
+         {name:"vibration_rms",label:"Drivetrain vibration",val:6.2,unit:"mm/s",status:"warning",trend:"+0.4/h",history:[3.1,3.5,3.9,4.4,4.9,5.4,5.8,6.2]},
+         {name:"engine_egt",label:"Exhaust gas temp",val:92,unit:"°C",status:"healthy",trend:"stable",history:[91,91,92,91,92,93,92,92]},
+         {name:"coolant_temp",label:"Coolant temp",val:88,unit:"°C",status:"healthy",trend:"stable",history:[87,88,87,88,88,89,88,88]},
+         {name:"tyre_fl",label:"Tyre pressure FL",val:715,unit:"kPa",status:"healthy",trend:"stable",history:[718,717,716,718,715,716,715,715]},
+         {name:"payload",label:"Payload weight",val:212,unit:"t",status:"healthy",trend:"variable",history:[0,180,210,215,0,195,205,212]},
+         {name:"fuel_rate",label:"Fuel consumption",val:122,unit:"L/hr",status:"healthy",trend:"stable",history:[119,121,120,122,120,121,122,122]},
+       ],
+       anomalyHistory:[0.08,0.11,0.14,0.19,0.27,0.38,0.51,0.58,0.63,0.67,0.69,0.71,0.72],
+       rul:{current:127,initial:3500,predicted:["3500","3200","2800","2200","1600","1000","500","127"],labels:["T-7d","T-6d","T-5d","T-4d","T-3d","T-2d","T-1d","Now"],failurePct:0.68},
+       features:[{name:"vibration_rms",score:0.71},{name:"engine_egt",score:0.12},{name:"coolant_temp",score:0.09},{name:"payload",score:0.05},{name:"fuel_rate",score:0.03}],
+       decomp:[{name:"vibration_rms",score:0.74},{name:"engine_egt",score:0.11},{name:"coolant_temp",score:0.08},{name:"fuel_rate",score:0.04},{name:"tyre_fl",score:0.03}],
+       model:{trained:"2026-03-18",accuracy:"91.7%",rmse:"22.1h",protocol:"OPC-UA"}
+      },
+      {id:"HT-001",type:"Cat 793F Haul Truck",status:"healthy",health:94,
+       crumb:"Pilbara Ops › Pit 3W › Haul Fleet › HT-001",
+       metrics:[{l:"RUL (h)",v:"847",c:"#16A34A"},{l:"Temp",v:"88°C",c:null},{l:"Tyre",v:"712kPa",c:null}],
+       sensors:[
+         {name:"engine_egt",label:"Exhaust gas temp",val:88,unit:"°C",status:"healthy",trend:"stable",history:[87,88,87,89,88,87,88,88]},
+         {name:"coolant_temp",label:"Coolant temp",val:82,unit:"°C",status:"healthy",trend:"stable",history:[81,82,82,81,82,83,82,82]},
+         {name:"vibration_rms",label:"Drivetrain vibration",val:2.1,unit:"mm/s",status:"healthy",trend:"stable",history:[2.0,2.1,2.0,2.2,2.1,2.0,2.1,2.1]},
+         {name:"tyre_fl",label:"Tyre pressure FL",val:712,unit:"kPa",status:"healthy",trend:"stable",history:[714,713,712,714,712,713,712,712]},
+         {name:"payload",label:"Payload weight",val:198,unit:"t",status:"healthy",trend:"variable",history:[0,190,205,210,0,185,198,198]},
+         {name:"fuel_rate",label:"Fuel consumption",val:115,unit:"L/hr",status:"healthy",trend:"stable",history:[113,114,115,114,115,116,115,115]},
+       ],
+       anomalyHistory:[0.04,0.05,0.04,0.06,0.05,0.04,0.05,0.05,0.06,0.05,0.04,0.05,0.06],
+       rul:{current:847,initial:2000,predicted:["2000","1990","1950","1900","1820","1700","1400","847"],labels:["T-7d","T-6d","T-5d","T-4d","T-3d","T-2d","T-1d","Now"],failurePct:0.06},
+       features:[{name:"vibration_rms",score:0.32},{name:"engine_egt",score:0.28},{name:"coolant_temp",score:0.22},{name:"tyre_fl",score:0.12},{name:"payload",score:0.06}],
+       decomp:[{name:"engine_egt",score:0.06},{name:"vibration_rms",score:0.05},{name:"coolant_temp",score:0.04},{name:"fuel_rate",score:0.03},{name:"tyre_fl",score:0.02}],
+       model:{trained:"2026-03-18",accuracy:"93.2%",rmse:"18.4h",protocol:"OPC-UA"}
+      },
+      {id:"CV-003",type:"Overland Conveyor Belt",status:"healthy",health:91,
+       crumb:"Pilbara Ops › ROM Pad › Conveyor › CV-003",
+       metrics:[{l:"RUL (h)",v:"1,204",c:"#16A34A"},{l:"Tension",v:"42kN",c:null},{l:"t/h",v:"3,847",c:null}],
+       sensors:[
+         {name:"belt_tension",label:"Belt tension",val:42,unit:"kN",status:"healthy",trend:"stable",history:[41,42,41,43,42,41,42,42]},
+         {name:"motor_current",label:"Drive motor current",val:148,unit:"A",status:"healthy",trend:"stable",history:[146,148,147,149,148,147,148,148]},
+         {name:"roller_vib",label:"Idler roller vibration",val:1.4,unit:"mm/s",status:"healthy",trend:"stable",history:[1.3,1.4,1.3,1.5,1.4,1.3,1.4,1.4]},
+         {name:"throughput",label:"Throughput rate",val:3847,unit:"t/h",status:"healthy",trend:"stable",history:[3820,3840,3850,3860,3847,3840,3845,3847]},
+         {name:"belt_speed",label:"Belt speed",val:4.2,unit:"m/s",status:"healthy",trend:"stable",history:[4.2,4.2,4.1,4.2,4.2,4.3,4.2,4.2]},
+         {name:"motor_temp",label:"Drive motor temp",val:61,unit:"°C",status:"healthy",trend:"stable",history:[60,61,60,62,61,60,61,61]},
+       ],
+       anomalyHistory:[0.03,0.04,0.03,0.05,0.04,0.03,0.04,0.04,0.05,0.04,0.03,0.04,0.05],
+       rul:{current:1204,initial:5000,predicted:["5000","4900","4700","4400","4000","3400","2600","1204"],labels:["T-7d","T-6d","T-5d","T-4d","T-3d","T-2d","T-1d","Now"],failurePct:0.04},
+       features:[{name:"belt_tension",score:0.35},{name:"motor_current",score:0.30},{name:"roller_vib",score:0.20},{name:"motor_temp",score:0.10},{name:"belt_speed",score:0.05}],
+       decomp:[{name:"belt_tension",score:0.05},{name:"motor_current",score:0.04},{name:"roller_vib",score:0.03},{name:"motor_temp",score:0.02},{name:"belt_speed",score:0.01}],
+       model:{trained:"2026-03-19",accuracy:"94.1%",rmse:"31.2h",protocol:"Modbus"}
+      }
+    ],
+    messages:[
+      {role:"user",text:"HT-007 vibration anomaly — what do you recommend?"},
+      {role:"agent",label:"HT-007 · Bearing degradation · RUL 127h",paras:[
+        "Vibration RMS is 6.2 mm/s, up from 3.1 mm/s over the past 72 hours. RUL model gives <strong>127 operating hours</strong> before bearing failure.",
+        "<span class='rtag'>Recommendation</span><br>Inspect at <strong>Shift 2 change-out (14:00 AWST)</strong>. Karratha has 2&times; SKF 32012X in stock. Repair: 3.5 hours.",
+        "<div class='chl'>Deferral risk: unplanned TOR within 5 days at ~$42,000/day. Scheduling now avoids this entirely.</div>"
+      ]},
+      {role:"user",text:"Is HT-012 safe to run the 14:00 shift?"},
+      {role:"agent",label:"HT-012 · Critical · Do not deploy",paras:[
+        "Engine EGT at 108°C, critical threshold 115°C. RUL model gives <strong>23 hours</strong>.",
+        "<span class='rtag'>Recommendation</span><br>Pull from rotation now. Route to HT-003 and HT-009. Work order #WO-2849 drafted."
+      ]}
+    ],
+    alerts:[
+      {sev:"critical",text:"<strong>HT-012</strong> — EGT approaching critical. Anomaly 0.94. Immediate inspection.",time:"09:43"},
+      {sev:"warning",text:"<strong>HT-007</strong> — Bearing vibration anomaly. RUL 127h. Inspect at shift change.",time:"08:17"},
+      {sev:"info",text:"<strong>CV-003</strong> — Scheduled belt inspection in 48h. Parts confirmed.",time:"06:00"}
+    ],
+    hierarchy:{
+      label:"Pilbara Operations",level:"Site",health:87,icon:"🏔",
+      children:[
+        {label:"Pit 1N",level:"Area",health:31,icon:"⛏",children:[
+          {label:"Haul Fleet",level:"Unit",health:31,icon:"🚛",children:[
+            {label:"HT-012",level:"Equipment",health:31,icon:"🚛",assetId:"HT-012",children:[
+              {label:"Engine Assembly",level:"Component",health:29,icon:"⚙",leaf:true},
+              {label:"Transmission",level:"Component",health:84,icon:"⚙",leaf:true},
+              {label:"Tyre Set",level:"Component",health:91,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Pit 3W",level:"Area",health:86,icon:"⛏",children:[
+          {label:"Haul Fleet",level:"Unit",health:81,icon:"🚛",children:[
+            {label:"HT-007",level:"Equipment",health:68,icon:"🚛",assetId:"HT-007",children:[
+              {label:"Engine Assembly",level:"Component",health:88,icon:"⚙",leaf:true},
+              {label:"Drivetrain Bearings",level:"Component",health:51,icon:"⚙",leaf:true},
+              {label:"Tyre Set",level:"Component",health:90,icon:"⚙",leaf:true},
+            ]},
+            {label:"HT-001",level:"Equipment",health:94,icon:"🚛",assetId:"HT-001",children:[
+              {label:"Engine Assembly",level:"Component",health:96,icon:"⚙",leaf:true},
+              {label:"Drivetrain Bearings",level:"Component",health:94,icon:"⚙",leaf:true},
+              {label:"Tyre Set",level:"Component",health:92,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"ROM Pad",level:"Area",health:91,icon:"📦",children:[
+          {label:"Conveyor System",level:"Unit",health:91,icon:"📡",children:[
+            {label:"CV-003",level:"Equipment",health:91,icon:"⚙",assetId:"CV-003",children:[
+              {label:"Belt Assembly",level:"Component",health:93,icon:"⚙",leaf:true},
+              {label:"Drive Motor",level:"Component",health:91,icon:"⚙",leaf:true},
+              {label:"Idler Rollers",level:"Component",health:89,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+      ]
+    }
+  }
+};
+
+// Add shallow energy/aviation/automotive skins (assets only, no deep data)
+['energy','aviation','automotive'].forEach(ind => {
+  const data = {
+    energy:{panelTitle:"Grid Assets · Alinta Energy · South Australia",agentTitle:"Grid Operations AI",agentSubtitle:"Alinta Energy · NEM Dispatch Aware",agentPlaceholder:"Ask about curtailment, BESS, transformer health...",
+      kpis:[{l:"Generation availability",v:"91.4%",c:"g",d:"+0.8% vs last week"},{l:"Active alerts",v:"2",c:"a",d:"1 warning · 1 critical"},{l:"Avg asset health",v:"78.5%",c:"",d:"9 assets"},{l:"Curtailment risk 24h",v:"34 MWh",c:"a",d:"WT-04 gearbox"},{l:"Revenue at risk",v:"$4.8K",c:"",d:"at $140/MWh"}],
+      assets:[
+        {id:"WT-004",type:"Vestas V150 Wind Turbine",status:"critical",health:38,crumb:"SA Grid › Snowtown Wind › Turbine Fleet › WT-004",metrics:[{l:"RUL (h)",v:"41",c:"#DC2626"},{l:"Gearbox",v:"9.1mm/s",c:"#DC2626"},{l:"Anomaly",v:"0.91",c:"#DC2626"}]},
+        {id:"BESS-01",type:"Tesla Megapack 2XL",status:"warning",health:71,crumb:"SA Grid › Torrens Island › BESS › BESS-01",metrics:[{l:"RUL",v:"1,840c",c:"#D97706"},{l:"Cell temp",v:"38.4°C",c:"#D97706"},{l:"SOC",v:"62%",c:null}]},
+        {id:"TX-07",type:"220kV Transformer",status:"healthy",health:88,crumb:"SA Grid › Port Augusta Sub › 220kV Bus › TX-07",metrics:[{l:"RUL (h)",v:"6,200+",c:"#16A34A"},{l:"Oil temp",v:"61°C",c:null},{l:"H₂",v:"12ppm",c:null}]},
+        {id:"WT-011",type:"Vestas V150 Wind Turbine",status:"healthy",health:93,crumb:"SA Grid › Snowtown Wind › Turbine Fleet › WT-011",metrics:[{l:"RUL (h)",v:"3,100",c:"#16A34A"},{l:"Rotor",v:"14.2rpm",c:null},{l:"Output",v:"4.1MW",c:null}]}
+      ],
+      messages:[{role:"user",text:"What's the situation with WT-004?"},{role:"agent",label:"WT-004 · Gearbox · RUL 41h",paras:["Gearbox vibration 9.1 mm/s from 2.8 baseline. RUL <strong>41 hours</strong> — falls in tomorrow's NEM peak.","<span class='rtag'>Recommendation</span><br>Offline before 06:00 AEST. Adelaide has SKF 6322M. Repair 6 hours, clear of peak.","<div class='chl'>34 MWh curtailed at $140/MWh = $4,760 if failure during peak dispatch.</div>"]}],
+      alerts:[{sev:"critical",text:"<strong>WT-004</strong> — Gearbox critical. RUL 41h. NEM peak overlap.",time:"11:22"},{sev:"warning",text:"<strong>BESS-01</strong> — Cell temp trending above nominal.",time:"09:05"},{sev:"info",text:"<strong>TX-07</strong> — DGA scheduled in 7 days. H₂ normal.",time:"06:00"}]},
+    aviation:{panelTitle:"Line Maintenance · Malaysia Airlines · KUL",agentTitle:"Line Maintenance AI",agentSubtitle:"Malaysia Airlines · MEL-Aware · ATA Chapters",agentPlaceholder:"Ask about MEL items, AOG risk, component RUL...",
+      kpis:[{l:"Despatch reliability",v:"98.7%",c:"g",d:"+0.2% vs last month"},{l:"Active MEL items",v:"4",c:"a",d:"3 Cat B · 1 Cat C"},{l:"Avg airframe health",v:"84.1%",c:"",d:"8 frames"},{l:"AOG risk 72h",v:"1",c:"a",d:"9M-MXA APU"},{l:"AOG exposure",v:"$68K",c:"",d:"if unscheduled"}],
+      assets:[
+        {id:"9M-MTK",type:"Boeing 737-800",status:"critical",health:44,crumb:"MAS Fleet › B737-800 › 9M-MTK › ATA 78 › Rev. Actuator",metrics:[{l:"Cycles to limit",v:"28",c:"#DC2626"},{l:"Act. lag",v:"2.4s",c:"#DC2626"},{l:"Anomaly",v:"0.89",c:"#DC2626"}]},
+        {id:"9M-MXA",type:"Airbus A330-200",status:"warning",health:62,crumb:"MAS Fleet › A330-200 › 9M-MXA › ATA 49 APU › Starter",metrics:[{l:"Starts to limit",v:"340",c:"#D97706"},{l:"Start trend",v:"+18%",c:"#D97706"},{l:"Anomaly",v:"0.76",c:"#D97706"}]},
+        {id:"9M-MRO",type:"Airbus A350-900",status:"healthy",health:96,crumb:"MAS Fleet › A350-900 › 9M-MRO › ATA 72 Engine",metrics:[{l:"EGT margin",v:"42°C",c:"#16A34A"},{l:"N1 vib.",v:"0.3in/s",c:null},{l:"Oil",v:"0.1L/hr",c:null}]},
+        {id:"9M-MLN",type:"Boeing 737-800",status:"healthy",health:89,crumb:"MAS Fleet › B737-800 › 9M-MLN › ATA 32 Landing Gear",metrics:[{l:"Brake wear",v:"34%",c:"#16A34A"},{l:"Strut",v:"1,820psi",c:null},{l:"To C-check",v:"842c",c:null}]}
+      ],
+      messages:[{role:"user",text:"Is 9M-MTK safe to despatch tonight?"},{role:"agent",label:"9M-MTK · ATA 78 · Thrust Rev. · 28 cycles",paras:["Actuator at <strong>28 cycles to limit</strong>. MMEL Cat B allows 3 more calendar days.","<span class='rtag'>Recommendation</span><br>Can despatch tonight under MEL relief. Schedule replacement at tomorrow's overnight turn — KUL stores has p/n 852200-2.","<div class='chl'>AOG at outstation averages $68,000 including crew positioning, air freight, and rebooking.</div>"]}],
+      alerts:[{sev:"critical",text:"<strong>9M-MTK</strong> — ATA 78 actuator at 28 cycles. MEL Cat B expires 3 days.",time:"13:14"},{sev:"warning",text:"<strong>9M-MXA</strong> — APU starter wear. RUL 340 starts. Schedule C-check.",time:"10:47"},{sev:"info",text:"<strong>9M-MRO</strong> — Borescope due 180 cycles. No anomalies.",time:"06:00"}]},
+    automotive:{panelTitle:"工場設備 · Toyota Tsutsumi Plant",agentTitle:"工場保全AI — Factory Maintenance AI",agentSubtitle:"Toyota Motor Corp · Tsutsumi · SORACOM Connected",agentPlaceholder:"設備の状態、部品在庫、メンテナンスについて...",
+      kpis:[{l:"稼働率 (availability)",v:"97.1%",c:"g",d:"+0.4% vs last shift"},{l:"Active alerts",v:"2",c:"a",d:"1 warning · 1 critical"},{l:"Avg health",v:"76.3%",c:"",d:"16 machines"},{l:"Predicted stops 8h",v:"1",c:"a",d:"TP-07 · die wear"},{l:"Production at risk",v:"¥4.2M",c:"",d:"if TP-07 not swapped"}],
+      assets:[
+        {id:"TP-07",type:"Transfer Press スタンピングプレス",status:"critical",health:29,crumb:"豊田市 › Tsutsumi › Stamping Shop › Press Line 3 › TP-07",metrics:[{l:"RUL (strokes)",v:"1,840",c:"#DC2626"},{l:"Tonnage",v:"+8.4%",c:"#DC2626"},{l:"Anomaly",v:"0.93",c:"#DC2626"}]},
+        {id:"WR-14",type:"Robotic Welder 溶接ロボット",status:"warning",health:65,crumb:"豊田市 › Tsutsumi › Welding Shop › Cell W4 › WR-14",metrics:[{l:"RUL (h)",v:"88",c:"#D97706"},{l:"J3 torque",v:"+11%",c:"#D97706"},{l:"Anomaly",v:"0.68",c:"#D97706"}]},
+        {id:"CNC-22",type:"CNC Machining Centre",status:"healthy",health:91,crumb:"豊田市 › Tsutsumi › Machining › Cell M2 › CNC-22",metrics:[{l:"RUL (h)",v:"620",c:"#16A34A"},{l:"Spindle",v:"68%",c:null},{l:"Tool wear",v:"0.21",c:null}]},
+        {id:"CV-A3",type:"Assembly Conveyor コンベア",status:"healthy",health:94,crumb:"豊田市 › Tsutsumi › Assembly › Line A › CV-A3",metrics:[{l:"RUL (h)",v:"2,340",c:"#16A34A"},{l:"Belt",v:"18.4kN",c:null},{l:"Takt",v:"56s",c:null}]}
+      ],
+      messages:[{role:"user",text:"TP-07のプレス金型の状態を教えてください。"},{role:"agent",label:"TP-07 · 金型摩耗 · RUL 1,840 strokes",paras:["トン数が基準値から8.4%上昇。RULモデルでは<strong>残り1,840ストローク</strong>（約6.4時間）。","<span class='rtag'>Recommendation</span><br>シフト終了（18:00）に金型交換。豊田工場倉庫に部品D-7842在庫あり。作業時間45分。","<div class='chl'>破損リスク：ライン停止最低4時間、約¥4.2Mの生産損失。計画交換コスト：¥180K。</div>"]}],
+      alerts:[{sev:"critical",text:"<strong>TP-07</strong> — Die wear critical. RUL 1,840 strokes. Schedule change-out at shift end.",time:"14:08"},{sev:"warning",text:"<strong>WR-14</strong> — Joint 3 servo torque trend. RUL 88h. Schedule this weekend.",time:"11:33"},{sev:"info",text:"<strong>CNC-22</strong> — Spindle inspection in 3 shifts. Tool wear nominal.",time:"06:00"}]}
+  };
+  // Fill in missing sensor/hierarchy data with placeholders
+  const s = data[ind];
+  s.assets.forEach(a => {
+    if(!a.sensors) a.sensors = [{name:"primary",label:"Primary sensor",val:Math.round(Math.random()*100),unit:"units",status:a.status==="critical"?"critical":a.status==="warning"?"warning":"healthy",trend:"stable",history:[50,55,52,58,60,57,59,60]}];
+    if(!a.anomalyHistory) a.anomalyHistory = [0.1,0.1,0.1,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9].map(v=>v*(parseFloat(a.metrics[2].v)||0.5));
+    if(!a.rul) a.rul = {current:parseInt(a.metrics[0].v)||500,initial:2000,predicted:["2000","1800","1500","1200","900","600","300","100"],labels:["T-7d","T-6d","T-5d","T-4d","T-3d","T-2d","T-1d","Now"],failurePct:a.health/100};
+    if(!a.features) a.features = [{name:"primary",score:0.6},{name:"secondary",score:0.3},{name:"tertiary",score:0.1}];
+    if(!a.decomp) a.decomp = a.features;
+    if(!a.model) a.model = {trained:"2026-03-19",accuracy:"91.0%",rmse:"25.0h",protocol:ind==="automotive"?"MQTT":"OPC-UA"};
+  });
+  const hierarchies = {
+    energy: {
+      label:"Alinta Energy — South Australia",level:"Site",health:86,icon:"⚡",
+      children:[
+        {label:"Snowtown Wind Farm",level:"Area",health:78,icon:"🌬️",children:[
+          {label:"Turbine Fleet",level:"Unit",health:78,icon:"🌀",children:[
+            {label:"WT-004",level:"Equipment",health:38,icon:"🌀",assetId:"WT-004",children:[
+              {label:"Gearbox Assembly",level:"Component",health:28,icon:"⚙",leaf:true},
+              {label:"Nacelle & Generator",level:"Component",health:81,icon:"⚙",leaf:true},
+              {label:"Rotor & Blades",level:"Component",health:90,icon:"⚙",leaf:true},
+              {label:"Tower & Foundation",level:"Component",health:98,icon:"⚙",leaf:true},
+            ]},
+            {label:"WT-011",level:"Equipment",health:93,icon:"🌀",assetId:"WT-011",children:[
+              {label:"Gearbox Assembly",level:"Component",health:94,icon:"⚙",leaf:true},
+              {label:"Nacelle & Generator",level:"Component",health:95,icon:"⚙",leaf:true},
+              {label:"Rotor & Blades",level:"Component",health:91,icon:"⚙",leaf:true},
+              {label:"Tower & Foundation",level:"Component",health:99,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Torrens Island",level:"Area",health:71,icon:"🔋",children:[
+          {label:"BESS Array",level:"Unit",health:71,icon:"🔋",children:[
+            {label:"BESS-01",level:"Equipment",health:71,icon:"🔋",assetId:"BESS-01",children:[
+              {label:"Battery Cells — Module A",level:"Component",health:68,icon:"⚙",leaf:true},
+              {label:"Battery Cells — Module B",level:"Component",health:74,icon:"⚙",leaf:true},
+              {label:"Thermal Management",level:"Component",health:61,icon:"⚙",leaf:true},
+              {label:"Inverter Stack",level:"Component",health:88,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Port Augusta Substation",level:"Area",health:88,icon:"🏗",children:[
+          {label:"220kV Transmission",level:"Unit",health:88,icon:"🔌",children:[
+            {label:"TX-07",level:"Equipment",health:88,icon:"🔌",assetId:"TX-07",children:[
+              {label:"Main Tank & Oil",level:"Component",health:90,icon:"⚙",leaf:true},
+              {label:"Windings — HV",level:"Component",health:89,icon:"⚙",leaf:true},
+              {label:"Windings — LV",level:"Component",health:91,icon:"⚙",leaf:true},
+              {label:"Cooling Radiators",level:"Component",health:85,icon:"⚙",leaf:true},
+              {label:"Bushings & HV Term.",level:"Component",health:93,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+      ]
+    },
+    aviation: {
+      label:"Malaysia Airlines — KUL",level:"Site",health:84,icon:"✈️",
+      children:[
+        {label:"Narrow-body Fleet",level:"Area",health:80,icon:"✈️",children:[
+          {label:"B737-800 Type",level:"Unit",health:77,icon:"✈️",children:[
+            {label:"9M-MTK",level:"Equipment",health:44,icon:"✈️",assetId:"9M-MTK",children:[
+              {label:"ATA 72 — CFM56 Engine 1",level:"Component",health:82,icon:"⚙",leaf:true},
+              {label:"ATA 72 — CFM56 Engine 2",level:"Component",health:85,icon:"⚙",leaf:true},
+              {label:"ATA 78 — Thrust Reversers",level:"Component",health:29,icon:"⚙",leaf:true},
+              {label:"ATA 32 — Landing Gear",level:"Component",health:88,icon:"⚙",leaf:true},
+              {label:"ATA 29 — Hydraulics",level:"Component",health:91,icon:"⚙",leaf:true},
+            ]},
+            {label:"9M-MLN",level:"Equipment",health:89,icon:"✈️",assetId:"9M-MLN",children:[
+              {label:"ATA 72 — CFM56 Engine 1",level:"Component",health:91,icon:"⚙",leaf:true},
+              {label:"ATA 72 — CFM56 Engine 2",level:"Component",health:90,icon:"⚙",leaf:true},
+              {label:"ATA 78 — Thrust Reversers",level:"Component",health:88,icon:"⚙",leaf:true},
+              {label:"ATA 32 — Landing Gear",level:"Component",health:87,icon:"⚙",leaf:true},
+              {label:"ATA 29 — Hydraulics",level:"Component",health:92,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Wide-body Fleet",level:"Area",health:88,icon:"✈️",children:[
+          {label:"A330-200 Type",level:"Unit",health:62,icon:"✈️",children:[
+            {label:"9M-MXA",level:"Equipment",health:62,icon:"✈️",assetId:"9M-MXA",children:[
+              {label:"ATA 72 — CF6 Engine 1",level:"Component",health:88,icon:"⚙",leaf:true},
+              {label:"ATA 72 — CF6 Engine 2",level:"Component",health:86,icon:"⚙",leaf:true},
+              {label:"ATA 49 — APU (Honeywell 331)",level:"Component",health:41,icon:"⚙",leaf:true},
+              {label:"ATA 27 — Flight Controls",level:"Component",health:93,icon:"⚙",leaf:true},
+              {label:"ATA 36 — Pneumatics",level:"Component",health:90,icon:"⚙",leaf:true},
+            ]},
+          ]},
+          {label:"A350-900 Type",level:"Unit",health:96,icon:"✈️",children:[
+            {label:"9M-MRO",level:"Equipment",health:96,icon:"✈️",assetId:"9M-MRO",children:[
+              {label:"ATA 72 — Trent XWB Engine 1",level:"Component",health:97,icon:"⚙",leaf:true},
+              {label:"ATA 72 — Trent XWB Engine 2",level:"Component",health:96,icon:"⚙",leaf:true},
+              {label:"ATA 49 — APU",level:"Component",health:95,icon:"⚙",leaf:true},
+              {label:"ATA 32 — Landing Gear",level:"Component",health:98,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+      ]
+    },
+    automotive: {
+      label:"Toyota Tsutsumi Plant — 豊田市",level:"Site",health:83,icon:"🏭",
+      children:[
+        {label:"Stamping Shop プレス工場",level:"Area",health:58,icon:"🔨",children:[
+          {label:"Press Line 3",level:"Unit",health:58,icon:"🔨",children:[
+            {label:"TP-07",level:"Equipment",health:29,icon:"🔨",assetId:"TP-07",children:[
+              {label:"Die Set — Upper",level:"Component",health:24,icon:"⚙",leaf:true},
+              {label:"Die Set — Lower",level:"Component",health:31,icon:"⚙",leaf:true},
+              {label:"Servo Drive System",level:"Component",health:82,icon:"⚙",leaf:true},
+              {label:"Hydraulic Clamp Unit",level:"Component",health:78,icon:"⚙",leaf:true},
+              {label:"Bed & Frame",level:"Component",health:99,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Welding Shop 溶接工場",level:"Area",health:65,icon:"⚡",children:[
+          {label:"Cell W4",level:"Unit",health:65,icon:"🦾",children:[
+            {label:"WR-14",level:"Equipment",health:65,icon:"🦾",assetId:"WR-14",children:[
+              {label:"Joint 1 — Servo Motor",level:"Component",health:91,icon:"⚙",leaf:true},
+              {label:"Joint 2 — Servo Motor",level:"Component",health:88,icon:"⚙",leaf:true},
+              {label:"Joint 3 — Servo Motor",level:"Component",health:48,icon:"⚙",leaf:true},
+              {label:"Welding Torch Head",level:"Component",health:72,icon:"⚙",leaf:true},
+              {label:"Wire Feed System",level:"Component",health:85,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Machining Shop 機械加工",level:"Area",health:91,icon:"⚙",children:[
+          {label:"Cell M2",level:"Unit",health:91,icon:"⚙",children:[
+            {label:"CNC-22",level:"Equipment",health:91,icon:"⚙",assetId:"CNC-22",children:[
+              {label:"Spindle Assembly",level:"Component",health:88,icon:"⚙",leaf:true},
+              {label:"Tool Turret",level:"Component",health:93,icon:"⚙",leaf:true},
+              {label:"Linear Guides X/Y/Z",level:"Component",health:95,icon:"⚙",leaf:true},
+              {label:"Coolant System",level:"Component",health:91,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+        {label:"Assembly Shop 組立工場",level:"Area",health:94,icon:"🔩",children:[
+          {label:"Assembly Line A",level:"Unit",health:94,icon:"🔩",children:[
+            {label:"CV-A3",level:"Equipment",health:94,icon:"🔩",assetId:"CV-A3",children:[
+              {label:"Drive Motor & Gearbox",level:"Component",health:96,icon:"⚙",leaf:true},
+              {label:"Belt & Tensioner",level:"Component",health:93,icon:"⚙",leaf:true},
+              {label:"Idler Rollers",level:"Component",health:94,icon:"⚙",leaf:true},
+              {label:"Control Panel",level:"Component",health:98,icon:"⚙",leaf:true},
+            ]},
+          ]},
+        ]},
+      ]
+    }
+  };
+  s.hierarchy = hierarchies[ind] || {label:"Fleet",level:"Site",health:80,icon:"🏭",children:[]};
+  SKINS[ind] = s;
+});
+
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let currentInd = 'mining';
+let currentPage = 'p1';
+let currentAsset = null;
+let streamInterval = null;
+let streamRows = [];
+let streamCount = 0;
+let chartInstances = {};
+let selectedNode = null;
+
+// ══════════════════════════════
+// UTILS
+// ══════════════════════════════
+function sc(s){return s==='critical'?'#DC2626':s==='warning'?'#D97706':'#16A34A';}
+function ring(pct,color){
+  const r=17,circ=2*Math.PI*r,arc=(pct/100)*circ;
+  return `<svg width="46" height="46" viewBox="0 0 46 46">
+    <circle cx="23" cy="23" r="${r}" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+    <circle cx="23" cy="23" r="${r}" fill="none" stroke="${color}" stroke-width="4"
+      stroke-dasharray="${arc.toFixed(1)} ${(circ-arc).toFixed(1)}" stroke-linecap="round"
+      transform="rotate(-90 23 23)"/></svg>`;
+}
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();delete chartInstances[id];}}
+function now(){const d=new Date();return d.toTimeString().slice(0,8);}
+
+// ══════════════════════════════
+// ROUTING
+// ══════════════════════════════
+function goPage(pid){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(pid).classList.add('active');
+  const idx=['p1','p2','p3','p4','p5'].indexOf(pid);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  currentPage = pid;
+  if(pid==='p2') renderP2(currentAsset || SKINS[currentInd].assets[0]);
+  if(pid==='p3') renderP3();
+  if(pid==='p4') startStream();
+  else stopStream();
+  if(pid==='p5') renderP5();
+}
+
+// ══════════════════════════════
+// INDUSTRY SWITCH
+// ══════════════════════════════
+function switchInd(ind){
+  currentInd = ind;
+  currentAsset = SKINS[ind].assets[0];
+  document.querySelectorAll('.itab').forEach((t,i)=>t.classList.toggle('active',['mining','energy','aviation','automotive'][i]===ind));
+  renderP1();
+  if(currentPage==='p2') renderP2(currentAsset);
+  if(currentPage==='p3') renderP3();
+  if(currentPage==='p5') renderP5();
+}
+
+// ══════════════════════════════
+// PAGE 1
+// ══════════════════════════════
+function renderP1(){
+  const s = SKINS[currentInd];
+  document.getElementById('pt1').textContent = s.panelTitle;
+  document.getElementById('at1').textContent = s.agentTitle;
+  document.getElementById('as1').textContent = s.agentSubtitle;
+  document.getElementById('ai1').placeholder = s.agentPlaceholder;
+  document.getElementById('kpi1').innerHTML = s.kpis.map(k=>`
+    <div class="kpi"><div class="kpi-l">${k.l}</div><div class="kpi-v ${k.c}">${k.v}</div><div class="kpi-d">${k.d}</div></div>`).join('');
+  document.getElementById('ag1').innerHTML = s.assets.map(a=>{
+    const c=sc(a.status);
+    return `<div class="asset-card ${a.status}" onclick="drilldown('${a.id}')">
+      <div class="card-top">
+        <div class="hring">${ring(a.health,c)}<span class="hpct" style="color:${c}">${a.health}%</span></div>
+        <div class="ai">
+          <div class="aid">${a.id}</div>
+          <div class="atype">${a.type}</div>
+          <div class="acrumb">${a.crumb}</div>
+        </div>
+        <span class="sbadge ${a.status}">${a.status[0].toUpperCase()+a.status.slice(1)}</span>
+      </div>
+      <div class="card-metrics">${a.metrics.map(m=>`
+        <div class="cm"><div class="cml">${m.l}</div><div class="cmv"${m.c?` style="color:${m.c}"`:''}>${m.v}</div></div>`).join('')}
+      </div></div>`;
+  }).join('');
+  document.getElementById('msgs1').innerHTML = s.messages.map(m=>{
+    if(m.role==='user') return `<div class="msg"><div class="av user">ME</div><div class="bubble user">${m.text}</div></div>`;
+    return `<div class="msg"><div class="av agent">AI</div><div class="bubble"><div class="bubble-lbl">${m.label}</div>${m.paras.map(p=>`<p>${p}</p>`).join('')}</div></div>`;
+  }).join('');
+  document.getElementById('alr1').innerHTML = s.alerts.map(a=>
+    `<div class="arow ${a.sev}"><div class="apip ${a.sev}"></div><span class="atext">${a.text}</span><span class="atime">${a.time}</span></div>`).join('');
+}
+
+// ══════════════════════════════
+// PAGE 2
+// ══════════════════════════════
+function drilldown(assetId){
+  const a = SKINS[currentInd].assets.find(x=>x.id===assetId);
+  if(a){ currentAsset=a; goPage('p2'); }
+}
+
+function renderP2(a){
+  if(!a) return;
+  currentAsset = a;
+  const c = sc(a.status);
+  document.getElementById('p2-id').textContent = a.id;
+  document.getElementById('p2-type').textContent = a.type;
+  document.getElementById('p2-crumb').textContent = a.crumb;
+  const badge = document.getElementById('p2-badge');
+  badge.textContent = a.status[0].toUpperCase()+a.status.slice(1);
+  badge.className = `sbadge ${a.status}`;
+
+  // Stat cards
+  const rul = a.rul ? a.rul.current : '—';
+  const anomaly = a.decomp ? a.decomp.reduce((s,x)=>s+x.score,0).toFixed(2) : '—';
+  document.getElementById('p2-stats').innerHTML = `
+    <div class="stat-card"><div class="sc-label">Health score</div><div class="sc-val" style="color:${c}">${a.health}%</div><div class="sc-sub">${a.status}</div></div>
+    <div class="stat-card"><div class="sc-label">RUL remaining</div><div class="sc-val" style="color:${c}">${rul}<span style="font-size:14px;color:var(--muted)"> h</span></div><div class="sc-sub">estimated hours to failure</div></div>
+    <div class="stat-card"><div class="sc-label">Anomaly score</div><div class="sc-val" style="color:${c}">${a.metrics[2]?a.metrics[2].v:'—'}</div><div class="sc-sub">isolation forest output</div></div>
+    <div class="stat-card"><div class="sc-label">Protocol</div><div class="sc-val" style="font-size:16px">${a.model?a.model.protocol:'OPC-UA'}</div><div class="sc-sub">ingestion via Zerobus</div></div>`;
+
+  // Sensor tiles
+  document.getElementById('p2-sensors').innerHTML = (a.sensors||[]).map(s=>{
+    const sColor = s.status==='critical'?'#DC2626':s.status==='warning'?'#D97706':'#16A34A';
+    const canvasId = `spark-${s.name}`;
+    return `<div class="sensor-tile ${s.status!=='healthy'?s.status:''}">
+      <div class="st-top"><div><div class="st-name">${s.label}</div><div class="st-unit">${s.unit}</div></div></div>
+      <div class="st-val" style="color:${sColor}">${s.val}<span style="font-size:12px;color:var(--muted);font-weight:400;font-family:'IBM Plex Sans',sans-serif"> ${s.unit}</span></div>
+      <div class="st-trend" style="color:${sColor}">${s.trend}</div>
+      <div class="sparkline-wrap"><canvas id="${canvasId}"></canvas></div>
+    </div>`;
+  }).join('');
+
+  // Draw sparklines after DOM update
+  setTimeout(()=>{
+    (a.sensors||[]).forEach(s=>{
+      const id = `spark-${s.name}`;
+      destroyChart(id);
+      const ctx = document.getElementById(id);
+      if(!ctx) return;
+      const sColor = s.status==='critical'?'#DC2626':s.status==='warning'?'#D97706':'#16A34A';
+      chartInstances[id] = new Chart(ctx,{
+        type:'line',
+        data:{labels:s.history.map((_,i)=>i),datasets:[{data:s.history,borderColor:sColor,borderWidth:2,fill:true,backgroundColor:sColor+'18',pointRadius:0,tension:.4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:{duration:0}}
+      });
+    });
+
+    // Anomaly timeline
+    destroyChart('anomaly-chart');
+    const ctx2 = document.getElementById('anomaly-chart');
+    if(ctx2 && a.anomalyHistory){
+      const hrs = a.anomalyHistory.map((_,i)=>`-${(a.anomalyHistory.length-1-i)*6}h`);
+      hrs[hrs.length-1]='Now';
+      chartInstances['anomaly-chart'] = new Chart(ctx2,{
+        type:'line',
+        data:{labels:hrs,datasets:[
+          {label:'Anomaly score',data:a.anomalyHistory,borderColor:'#FF3621',borderWidth:2,fill:true,backgroundColor:'rgba(255,54,33,.08)',pointRadius:3,pointBackgroundColor:'#FF3621',tension:.4},
+          {label:'Warning threshold',data:a.anomalyHistory.map(()=>0.5),borderColor:'#D97706',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false},
+          {label:'Critical threshold',data:a.anomalyHistory.map(()=>0.8),borderColor:'#DC2626',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10},usePointStyle:true}}},scales:{y:{min:0,max:1,ticks:{font:{size:10}},grid:{color:'#F1F5F9'}},x:{ticks:{font:{size:10}},grid:{display:false}}},animation:{duration:0}}
+      });
+    }
+  },50);
+}
+
+// ══════════════════════════════
+// PAGE 3: HIERARCHY
+// ══════════════════════════════
+function renderP3(){
+  const h = SKINS[currentInd].hierarchy;
+  if(!h){document.getElementById('tree-root').innerHTML='<div style="color:var(--muted);font-size:12px;padding:10px;">No hierarchy data for this industry.</div>';return;}
+  Object.keys(nodeRegistry).forEach(k=>delete nodeRegistry[k]);
+  registerNodes(h, 0);
+  document.getElementById('tree-root').innerHTML = buildTree(h, 0);
+  document.getElementById('p3-detail').innerHTML = '<div style="color:var(--muted);font-size:13px;margin-top:40px;text-align:center;">Select a node to view details</div>';
+  setTimeout(()=>selectNode(h),10);
+}
+
+function buildTree(node, depth){
+  const hasChildren = node.children && node.children.length>0;
+  const healthColor = node.health>=80?'#16A34A':node.health>=60?'#D97706':'#DC2626';
+  const badgeBg = node.health>=80?'#DCFCE7':node.health>=60?'#FEF3C7':'#FEE2E2';
+  const nodeKey = encodeURIComponent(JSON.stringify({label:node.label,level:node.level,health:node.health}));
+  return `<div class="tree-node">
+    <div class="tn-row" id="tnr-${depth}-${node.label.replace(/\s/g,'')}" onclick="selectNodeById(${depth},'${node.label.replace(/\s/g,'')}',event)">
+      <svg class="tn-chevron ${hasChildren?'':'leaf'} ${depth===0?'open':''}" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span class="tn-icon">${node.icon||'📦'}</span>
+      <span class="tn-label">${node.label}</span>
+      <span class="tn-badge" style="background:${badgeBg};color:${healthColor}">${node.health}%</span>
+    </div>
+    ${hasChildren?`<div class="tn-children" id="tnc-${depth}-${node.label.replace(/\s/g,'')}" style="display:${depth===0?'block':'none'}">${node.children.map(c=>buildTree(c,depth+1)).join('')}</div>`:''}
+  </div>`;
+}
+
+const nodeRegistry = {};
+function registerNodes(node,depth){
+  const key = `${depth}-${node.label.replace(/\s/g,'')}`;
+  nodeRegistry[key] = node;
+  if(node.children) node.children.forEach(c=>registerNodes(c,depth+1));
+}
+
+function selectNodeById(depth,labelKey,e){
+  e.stopPropagation();
+  const key = `${depth}-${labelKey}`;
+  const node = nodeRegistry[key];
+  if(node){
+    // Toggle children
+    const childEl = document.getElementById(`tnc-${key}`);
+    const rowEl = document.getElementById(`tnr-${key}`);
+    if(childEl){
+      const open = childEl.style.display!=='none';
+      childEl.style.display = open?'none':'block';
+      const chev = rowEl.querySelector('.tn-chevron');
+      if(chev) chev.classList.toggle('open',!open);
+    }
+    document.querySelectorAll('.tn-row').forEach(r=>r.classList.remove('selected'));
+    rowEl.classList.add('selected');
+    selectNode(node);
+  }
+}
+
+function selectNode(node){
+  selectedNode = node;
+  const healthColor = node.health>=80?'#16A34A':node.health>=60?'#D97706':'#DC2626';
+  const levelColors = {Site:'#EEF2FF',Area:'#F0FDF4',Unit:'#FFFBEB',Equipment:'#FEF2F2',Component:'#F8FAFC'};
+  const iconColors = {Site:'#4338CA',Area:'#166534',Unit:'#92400E',Equipment:'#991B1B',Component:'#475569'};
+  const lvl = node.level||'Node';
+  const bg = levelColors[lvl]||'#F8FAFC';
+  const ic = iconColors[lvl]||'#475569';
+
+  let childrenHtml = '';
+  if(node.children && node.children.length){
+    childrenHtml = `<div>
+      <div class="sect-title" style="margin-bottom:8px">Child nodes (${node.children.length})</div>
+      <div class="children-grid">${node.children.map(c=>{
+        const cc = c.health>=80?'#16A34A':c.health>=60?'#D97706':'#DC2626';
+        const action = c.assetId?`onclick="drilldown('${c.assetId}');goPage('p2')" style="cursor:pointer"`:'';
+        return `<div class="child-card" ${action}>
+          <div class="cc-id">${c.label}</div>
+          <div class="cc-type">${c.level}</div>
+          <div class="cc-health" style="color:${cc}">${c.health}%</div>
+        </div>`;
+      }).join('')}</div></div>`;
+  }
+
+  // Health breakdown for equipment/unit with children
+  let breakdownHtml = '';
+  if(node.children && node.children.length){
+    breakdownHtml = `<div class="health-breakdown">
+      <div class="sect-title">Health rollup</div>
+      ${node.children.map(c=>{
+        const cc = c.health>=80?'#16A34A':c.health>=60?'#D97706':'#DC2626';
+        return `<div class="hb-row">
+          <span class="hb-label">${c.icon||''} ${c.label}</span>
+          <div class="hb-bar-wrap"><div class="hb-bar" style="width:${c.health}%;background:${cc}"></div></div>
+          <span class="hb-pct" style="color:${cc}">${c.health}%</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  const drillLink = node.assetId ? `<button class="back-btn" style="margin-top:4px" onclick="drilldown('${node.assetId}');goPage('p2')">View asset drilldown →</button>` : '';
+
+  document.getElementById('p3-detail').innerHTML = `
+    <div class="node-detail-hdr">
+      <div class="nd-icon-wrap" style="background:${bg};color:${ic};font-size:20px">${node.icon||'📦'}</div>
+      <div>
+        <div class="nd-name">${node.label}</div>
+        <div class="nd-level" style="color:${ic}">${lvl}</div>
+        ${drillLink}
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;color:${healthColor}">${node.health}%</div>
+        <div style="font-size:11px;color:var(--muted)">health score</div>
+      </div>
+    </div>
+    ${breakdownHtml}
+    ${childrenHtml}
+  `;
+}
+
+// ══════════════════════════════
+// PAGE 4: SENSOR STREAM
+// ══════════════════════════════
+const PROTOCOLS = ['OPC-UA','OPC-UA','OPC-UA','MQTT','Modbus'];
+const QUALITIES = ['good','good','good','good','good','good','uncertain','bad'];
+
+function startStream(){
+  // Populate asset filter
+  const sel = document.getElementById('stream-asset-filter');
+  const assets = SKINS[currentInd].assets;
+  sel.innerHTML = '<option value="">All assets</option>' + assets.map(a=>`<option value="${a.id}">${a.id}</option>`).join('');
+
+  stopStream();
+  // Add initial rows
+  for(let i=0;i<20;i++) addStreamRow(true);
+  streamInterval = setInterval(()=>addStreamRow(false), 600);
+}
+
+function stopStream(){
+  if(streamInterval){clearInterval(streamInterval);streamInterval=null;}
+}
+
+function addStreamRow(silent){
+  const assets = SKINS[currentInd].assets;
+  const a = assets[Math.floor(Math.random()*assets.length)];
+  const sensors = a.sensors||[{name:"sensor_01",label:"Sensor 01",val:50,unit:"units",status:"healthy"}];
+  const s = sensors[Math.floor(Math.random()*sensors.length)];
+  const qual = s.status==='critical'?'bad':s.status==='warning'?(Math.random()>0.5?'uncertain':'good'):'good';
+  const proto = PROTOCOLS[Math.floor(Math.random()*PROTOCOLS.length)];
+  const noise = (Math.random()-0.5)*0.05*s.val;
+  const val = (parseFloat(s.val)+noise).toFixed(2);
+
+  const assetF = document.getElementById('stream-asset-filter').value;
+  const qualF = document.getElementById('stream-quality-filter').value;
+  const protoF = document.getElementById('stream-proto-filter').value;
+  if(assetF && a.id!==assetF) return;
+  if(qualF && qual!==qualF) return;
+  if(protoF && proto!==protoF) return;
+
+  streamCount++;
+  document.getElementById('stream-count').textContent = streamCount.toLocaleString()+' readings';
+
+  const row = document.createElement('tr');
+  row.className = `${qual!=='good'?qual:''} ${silent?'':'new'}`;
+  row.innerHTML = `
+    <td class="ts-cell">${now()}.${String(Math.floor(Math.random()*999)).padStart(3,'0')}</td>
+    <td><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500">${a.id}</span></td>
+    <td class="tag-name">${s.name}</td>
+    <td class="val-cell" style="color:${qual==='bad'?'#DC2626':qual==='uncertain'?'#D97706':'inherit'}">${val}</td>
+    <td style="font-size:11px;color:var(--muted)">${s.unit}</td>
+    <td><span class="q-badge ${qual}">${qual}</span></td>
+    <td><span class="proto-badge ${proto.toLowerCase().replace('-','')}">${proto}</span></td>`;
+
+  const tbody = document.getElementById('stream-body');
+  tbody.insertBefore(row, tbody.firstChild);
+  // Cap at 200 rows
+  while(tbody.children.length > 200) tbody.removeChild(tbody.lastChild);
+}
+
+// ══════════════════════════════
+// PAGE 5: MODEL EXPLAINABILITY
+// ══════════════════════════════
+function renderP5(){
+  const assets = SKINS[currentInd].assets;
+  const sel = document.getElementById('p5-asset-sel');
+  sel.innerHTML = assets.map(a=>`<option value="${a.id}">${a.id} — ${a.type}</option>`).join('');
+  const assetId = sel.value || assets[0].id;
+  const a = assets.find(x=>x.id===assetId)||assets[0];
+  renderP5Asset(a);
+}
+
+function renderP5(){
+  const assets = SKINS[currentInd].assets;
+  const sel = document.getElementById('p5-asset-sel');
+  const prevVal = sel.value;
+  sel.innerHTML = assets.map(a=>`<option value="${a.id}">${a.id} — ${a.type}</option>`).join('');
+  if(prevVal && assets.find(x=>x.id===prevVal)) sel.value=prevVal;
+  const a = assets.find(x=>x.id===sel.value)||assets[0];
+  renderP5Asset(a);
+}
+
+function renderP5Asset(a){
+  const healthColor = a.health>=80?'#16A34A':a.health>=60?'#D97706':'#DC2626';
+  const rul = a.rul||{current:500,initial:2000,predicted:["2000","1500","1000","500"],labels:["T-7d","T-3d","T-1d","Now"],failurePct:0.5};
+
+  // Meta
+  const m = a.model||{trained:"2026-03-19",accuracy:"91.0%",rmse:"25h",protocol:"OPC-UA"};
+  document.getElementById('p5-meta').innerHTML = [
+    {l:"Model trained",v:m.trained},{l:"RUL accuracy (R²)",v:m.accuracy},{l:"RMSE",v:m.rmse},
+    {l:"Protocol",v:m.protocol},{l:"Asset health",v:a.health+"%"},{l:"Anomaly score",v:a.metrics[2]?a.metrics[2].v:"—"}
+  ].map(x=>`<div class="mm-item"><div class="mm-label">${x.l}</div><div class="mm-val">${x.v}</div></div>`).join('');
+
+  // RUL stats
+  document.getElementById('p5-rul-stats').innerHTML = [
+    {l:"Current RUL",v:rul.current+" h",c:healthColor},
+    {l:"Initial RUL",v:rul.initial.toLocaleString()+" h",c:"var(--muted)"},
+    {l:"Degradation",v:Math.round((1-rul.current/rul.initial)*100)+"%",c:healthColor}
+  ].map(x=>`<div class="rul-stat"><span class="rul-stat-l">${x.l}</span><span class="rul-stat-v" style="color:${x.c}">${x.v}</span></div>`).join('');
+
+  // RUL chart
+  setTimeout(()=>{
+    destroyChart('rul-chart');
+    const ctx = document.getElementById('rul-chart');
+    if(ctx){
+      const projected = [...rul.predicted];
+      const actualLen = projected.length;
+      const projData = projected.map((v,i)=>i<actualLen-1?null:parseFloat(v));
+      chartInstances['rul-chart'] = new Chart(ctx,{
+        type:'line',
+        data:{
+          labels:rul.labels,
+          datasets:[
+            {label:'Actual RUL',data:rul.predicted.map((v,i)=>i<actualLen?parseFloat(v):null),borderColor:healthColor,borderWidth:2.5,fill:true,backgroundColor:healthColor+'12',pointRadius:4,pointBackgroundColor:healthColor,tension:.3},
+            {label:'Failure threshold',data:rul.labels.map(()=>0),borderColor:'#DC2626',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false},
+            {label:'Warning zone',data:rul.labels.map(()=>rul.initial*0.1),borderColor:'#D97706',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false}
+          ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,font:{size:10},usePointStyle:true}}},scales:{y:{title:{display:true,text:'Remaining useful life (hours)',font:{size:10}},ticks:{font:{size:10}},grid:{color:'#F1F5F9'}},x:{ticks:{font:{size:10}},grid:{display:false}}},animation:{duration:300}}
+      });
+    }
+
+    // Feature importance
+    destroyChart('feat-chart');
+    const ctx2 = document.getElementById('feat-chart');
+    if(ctx2 && a.features){
+      const feats = [...a.features].sort((x,y)=>y.score-x.score);
+      chartInstances['feat-chart'] = new Chart(ctx2,{
+        type:'bar',
+        data:{
+          labels:feats.map(f=>f.name),
+          datasets:[{data:feats.map(f=>f.score),backgroundColor:feats.map((_,i)=>i===0?'#FF3621':i===1?'#F97316':'#94A3B8'),borderRadius:4}]
+        },
+        options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:1,ticks:{font:{size:10}},grid:{color:'#F1F5F9'}},y:{ticks:{font:{size:10}},grid:{display:false}}},animation:{duration:300}}
+      });
+    }
+  },50);
+
+  // Anomaly decomp
+  const decomp = a.decomp||[];
+  const maxScore = Math.max(...decomp.map(x=>x.score),0.01);
+  document.getElementById('p5-decomp').innerHTML = decomp.map(d=>{
+    const pct = Math.round(d.score/maxScore*100);
+    const col = d.score>0.3?'#DC2626':d.score>0.15?'#D97706':'#94A3B8';
+    return `<div class="ad-row">
+      <span class="ad-name">${d.name}</span>
+      <div class="ad-bar-wrap"><div class="ad-bar" style="width:${pct}%;background:${col}"></div></div>
+      <span class="ad-score" style="color:${col}">${d.score.toFixed(2)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+// Register nodes for current industry — re-registered in renderP3 on industry switch
+if(SKINS[currentInd].hierarchy) registerNodes(SKINS[currentInd].hierarchy, 0);
+
+document.getElementById('p5-asset-sel').addEventListener('change',function(){
+  const a = SKINS[currentInd].assets.find(x=>x.id===this.value);
+  if(a) renderP5Asset(a);
+});
+
+renderP1();
+</script>
+</body>
+</html>
