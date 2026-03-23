@@ -52,6 +52,11 @@ This directory contains Databricks architecture diagrams for the APEX Energy Tra
 - ✅ 5 specialized personas (added Portfolio Manager)
 - ✅ Real-time session P&L tracking
 
+**V3 Accuracy Update (2026-03-23):**
+- 🔧 Corrected ML model description: Removed LSTM reference (not implemented)
+- 🔧 Updated to reflect actual implementation: XGBoost, LightGBM, Random Forest via AutoML
+- 🔧 All other technical claims verified against codebase (AutoML, champion/challenger, feature hash tracking)
+
 ### 3. Architect-Level Architecture (V1 - Deprecated)
 **File:** `apex_etrm_architect_architecture.png`
 **Status:** Superseded by V2
@@ -66,7 +71,7 @@ This directory contains Databricks architecture diagrams for the APEX Energy Tra
 **Run IDs:**
 - Executive: `apex-etrm-exec-v1` (2026-03-23)
 - Architect V1: `apex-etrm-architect-v1` (2026-03-23)
-- Architect V2: `apex-etrm-architect-v2` (2026-03-23) ⭐ **LATEST**
+- Architect V2: `apex-etrm-architect-v2` (2026-03-23) - Updated V3 (2026-03-23) ⭐ **LATEST**
 
 ## Source Prompts
 
@@ -107,11 +112,11 @@ These diagrams are designed for:
 - **EPEX (Europe):** European Power Exchange
 
 ### Core Capabilities
-1. **ML-Powered Forecasting:** Gradient Boosting + LSTM models with MLflow tracking
+1. **ML-Powered Forecasting:** AutoML (XGBoost, LightGBM, Random Forest) with MLflow tracking and champion/challenger testing
 2. **Risk Analytics:** Monte Carlo VaR with 10,000 simulation paths
 3. **Strategy Backtesting:** Mean reversion, momentum, arbitrage strategies
 4. **BESS Dispatch:** Battery Energy Storage System optimization
-5. **Multi-Persona Workspace:** Trader, Risk Manager, Quant Analyst, Dispatch Operator
+5. **Multi-Persona Workspace:** Dispatch Operator, Trader, Risk Manager, Quant Analyst, Portfolio Manager
 
 ### Databricks Services Used
 - **Unity Catalog:** Data governance and access controls
