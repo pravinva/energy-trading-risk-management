@@ -104,3 +104,147 @@ resources:
                 package: httpx
             - pypi:
                 package: pandas
+
+    apex_model_training:
+      name: APEX - Daily Model Training
+      description: Trains AutoML price and demand forecasting models daily at 6:00 AM
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: "UTC"
+        pause_status: PAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 7200
+      tasks:
+        - task_key: train_price_models
+          notebook_task:
+            notebook_path: notebooks/01_price_forecast_automl
+            base_parameters:
+              catalog: apex_fresh
+              region_id: NSW1
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 2
+            custom_tags:
+              ResourceClass: Standard
+          libraries:
+            - pypi:
+                package: mlflow
+            - pypi:
+                package: scikit-learn
+        - task_key: train_demand_models
+          depends_on:
+            - task_key: train_price_models
+          notebook_task:
+            notebook_path: notebooks/02_demand_forecast_automl
+            base_parameters:
+              catalog: apex_fresh
+              region_id: NSW1
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 2
+            custom_tags:
+              ResourceClass: Standard
+          libraries:
+            - pypi:
+                package: mlflow
+            - pypi:
+                package: scikit-learn
+
+    apex_var_batch:
+      name: APEX - Overnight VaR Calculation
+      description: Calculates portfolio VaR using Monte Carlo simulation daily at 2:00 AM
+      schedule:
+        quartz_cron_expression: "0 0 2 * * ?"
+        timezone_id: "UTC"
+        pause_status: PAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 1800
+      tasks:
+        - task_key: calculate_portfolio_var
+          spark_python_task:
+            python_file: jobs/analytics/var_batch.py
+            parameters:
+              - --catalog
+              - apex_fresh
+              - --simulation-paths
+              - "10000"
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 4
+            autoscale:
+              min_workers: 2
+              max_workers: 8
+            custom_tags:
+              ResourceClass: Standard
+          libraries:
+            - pypi:
+                package: numpy
+            - pypi:
+                package: pandas
+
+    apex_eod_reconciliation:
+      name: APEX - End of Day Reconciliation
+      description: Reconciles trades against settlement data and flags discrepancies at 5:00 PM
+      schedule:
+        quartz_cron_expression: "0 0 17 * * ?"
+        timezone_id: "UTC"
+        pause_status: PAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 1200
+      tasks:
+        - task_key: reconcile_trades
+          spark_python_task:
+            python_file: jobs/analytics/eod_reconciliation.py
+            parameters:
+              - --catalog
+              - apex_fresh
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 0
+            spark_conf:
+              spark.databricks.cluster.profile: singleNode
+              spark.master: local[*]
+            custom_tags:
+              ResourceClass: SingleNode
+          libraries:
+            - pypi:
+                package: pandas
+
+    apex_model_drift_monitoring:
+      name: APEX - Model Drift Monitoring
+      description: Monitors model performance metrics and triggers retraining if drift detected
+      schedule:
+        quartz_cron_expression: "0 0 8 * * ?"
+        timezone_id: "UTC"
+        pause_status: PAUSED
+      max_concurrent_runs: 1
+      timeout_seconds: 900
+      tasks:
+        - task_key: check_model_drift
+          spark_python_task:
+            python_file: jobs/analytics/model_drift_monitor.py
+            parameters:
+              - --catalog
+              - apex_fresh
+              - --mape-threshold
+              - "15.0"
+              - --r2-threshold
+              - "0.85"
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: i3.xlarge
+            num_workers: 0
+            spark_conf:
+              spark.databricks.cluster.profile: singleNode
+              spark.master: local[*]
+            custom_tags:
+              ResourceClass: SingleNode
+          libraries:
+            - pypi:
+                package: mlflow
+            - pypi:
+                package: pandas
