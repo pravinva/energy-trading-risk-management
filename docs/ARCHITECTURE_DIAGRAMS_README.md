@@ -1,6 +1,6 @@
 # APEX ETRM Architecture Diagrams
 
-This directory contains two Databricks architecture diagrams for the APEX Energy Trading & Risk Management platform, generated using Bricksmith (nanobanana).
+This directory contains Databricks architecture diagrams for the APEX Energy Trading & Risk Management platform, generated using Bricksmith (nanobanana).
 
 ## Diagrams
 
@@ -20,42 +20,60 @@ This directory contains two Databricks architecture diagrams for the APEX Energy
 - ML-powered forecasting reduces risk and improves trading performance
 - Governed, auditable flow from market signals to profitable trades
 
-### 2. Architect-Level Architecture
-**File:** `apex_etrm_architect_architecture.png`
+### 2. Architect-Level Architecture (CURRENT)
+**File:** `apex_etrm_architect_architecture_v2.png` ⭐ **LATEST**
 **Audience:** Solutions architects, technical leads, data engineers
 **Purpose:** Comprehensive technical architecture showing all Databricks components
 
 **Highlights:**
 - 6 detailed technical zones covering the complete data and application lifecycle
 - Medallion architecture (Bronze/Silver/Gold) with Unity Catalog governance
-- ML model factory with MLflow tracking and lineage
+- ML model factory with MLflow tracking and automated retraining
+- **NEW:** 7 scheduled Databricks Workflows (3 real-time + 4 daily batch)
+- **NEW:** 5 specialized personas with market-specific navigation
+- **NEW:** Automated model drift monitoring and EOD reconciliation
 - Specific Databricks services: Workflows, SQL Warehouse, Apps, Unity Catalog
-- Technical details: Monte Carlo VaR (10,000 paths), LSTM/Gradient Boosting models, REST APIs
+- Technical details: Monte Carlo VaR (10,000 paths), AutoML, REST APIs
 
 **Technical Components:**
 - **Zone 1:** External Market Data Sources (NEM AEMO, ERCOT, EPEX feeds)
 - **Zone 2:** Data Ingestion & Lakehouse Foundation (Medallion + Unity Catalog)
-- **Zone 3:** ML Model Factory (Feature engineering, MLflow, forecasting pipelines)
-- **Zone 4:** Trading Analytics & Risk Engines (VaR, backtesting, BESS optimization)
-- **Zone 5:** Application Delivery (Databricks Apps with React + FastAPI)
-- **Zone 6:** Orchestration, Monitoring & Governance (Workflows, data quality, audit logs)
+- **Zone 3:** ML Model Factory (Feature engineering, MLflow, forecasting pipelines, AutoML)
+- **Zone 4:** Trading Analytics & Risk Engines (VaR, backtesting, BESS optimization, drift monitoring)
+- **Zone 5:** Application Delivery (5 personas: Dispatch, Trader, Risk, Quant, Portfolio)
+- **Zone 6:** Orchestration, Monitoring & Governance (7 workflows, data quality, audit logs)
+
+**What's New in V2:**
+- ✅ Automated daily model training workflow (6:00 AM UTC)
+- ✅ Overnight VaR batch calculation (2:00 AM UTC)
+- ✅ End-of-day trade reconciliation (5:00 PM UTC)
+- ✅ Model drift monitoring with retraining alerts (8:00 AM UTC)
+- ✅ Market-specific persona sidebars (NEM: FCAS, ERCOT: Ancillary Services, EPEX: Market Coupling)
+- ✅ 5 specialized personas (added Portfolio Manager)
+- ✅ Real-time session P&L tracking
+
+### 3. Architect-Level Architecture (V1 - Deprecated)
+**File:** `apex_etrm_architect_architecture.png`
+**Status:** Superseded by V2
+**Date:** 2026-03-23 (original)
 
 ## Generation Details
 
 **Tool:** Bricksmith (nanobanana) - AI-powered Databricks architecture diagram generator
 **Generator:** Gemini 2.5 Flash Image
-**Date Generated:** 2026-03-23
 **MLflow Experiment:** bricksmith-local
 
 **Run IDs:**
-- Executive: `apex-etrm-exec-v1`
-- Architect: `apex-etrm-architect-v1`
+- Executive: `apex-etrm-exec-v1` (2026-03-23)
+- Architect V1: `apex-etrm-architect-v1` (2026-03-23)
+- Architect V2: `apex-etrm-architect-v2` (2026-03-23) ⭐ **LATEST**
 
 ## Source Prompts
 
 The detailed prompts used to generate these diagrams are stored in:
 - `~/Documents/Demo/bricksmith/prompts/apex_etrm_executive_architecture.txt`
-- `~/Documents/Demo/bricksmith/prompts/apex_etrm_architect_architecture.txt`
+- `~/Documents/Demo/bricksmith/prompts/apex_etrm_architect_architecture.txt` (V1)
+- `~/Documents/Demo/bricksmith/prompts/apex_etrm_architect_architecture_v2.txt` (V2 - current)
 
 ## Regeneration
 
