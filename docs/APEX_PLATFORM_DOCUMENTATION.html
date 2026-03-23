@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX Energy Trading & Risk Management Platform - Technical Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Databricks Brand Colors */
+            --db-red: #FF3621;
+            --db-red-dark: #E02F1B;
+            --db-green: #00A972;
+            --db-blue: #00A4FF;
+            --db-navy: #0A1E3C;
+            --db-gray-50: #F5F7FA;
+            --db-gray-100: #E8ECF1;
+            --db-gray-200: #D4DAE3;
+            --db-gray-300: #B8C2D0;
+            --db-gray-400: #8A96A8;
+            --db-gray-500: #5C6B7F;
+            --db-gray-600: #3D4A5C;
+            --db-gray-700: #2A3544;
+            --db-gray-800: #1A2332;
+            --db-gray-900: #0F1824;
+
+            /* Semantic Colors */
+            --color-bg: #FFFFFF;
+            --color-bg-secondary: var(--db-gray-50);
+            --color-bg-tertiary: var(--db-gray-100);
+            --color-bg-surface: var(--db-gray-50);
+            --color-text-primary: var(--db-gray-900);
+            --color-text-secondary: var(--db-gray-600);
+            --color-text-tertiary: var(--db-gray-500);
+            --color-border: var(--db-gray-200);
+            --color-border-light: var(--db-gray-100);
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+            /* Typography */
+            --font-heading: 'Barlow', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-body: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Courier New', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--color-text-primary);
+            background: var(--color-bg-secondary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            line-height: 1.2;
+            color: var(--db-navy);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--db-navy) 0%, var(--db-gray-800) 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-family: var(--font-heading);
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            margin-bottom: 32px;
+            max-width: 900px;
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            font-family: var(--font-body);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            background: var(--color-bg);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            border: 1px solid var(--color-border-light);
+        }
+
+        .tab-btn {
+            font-family: var(--font-heading);
+            background: transparent;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            letter-spacing: 0.2px;
+        }
+
+        .tab-btn:hover {
+            background: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--db-red);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section */
+        .section {
+            background: var(--color-bg);
+            border-radius: 12px;
+            padding: 48px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-border-light);
+        }
+
+        .section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--db-navy);
+            margin-bottom: 12px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--db-red);
+        }
+
+        .section h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--db-navy);
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .section h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--db-navy);
+            margin-bottom: 12px;
+        }
+
+        .section p {
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .section ul {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        .section li {
+            margin: 10px 0;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin: 32px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 32px 0;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin: 32px 0;
+        }
+
+        /* Card */
+        .card {
+            background: var(--color-bg-secondary);
+            border-radius: 10px;
+            padding: 28px;
+            border-left: 4px solid var(--db-red);
+            transition: all 0.3s ease;
+            border: 1px solid var(--color-border);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+            border-left-color: var(--db-red);
+        }
+
+        .card h4 {
+            color: var(--db-red);
+            font-size: 18px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* Metric Card */
+        .metric-card {
+            background: linear-gradient(135deg, var(--db-red) 0%, var(--db-red-dark) 100%);
+            color: white;
+            padding: 36px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .metric-card h3 {
+            font-size: 56px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            font-family: var(--font-heading);
+        }
+
+        .metric-card p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .metric-card.green {
+            background: linear-gradient(135deg, var(--db-green) 0%, #008C5E 100%);
+        }
+
+        .metric-card.blue {
+            background: linear-gradient(135deg, var(--db-blue) 0%, #0088CC 100%);
+        }
+
+        /* Persona Card */
+        .persona-card {
+            background: var(--color-bg);
+            border-radius: 12px;
+            padding: 32px;
+            border: 2px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        .persona-card:hover {
+            border-color: var(--db-red);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .persona-card h3 {
+            color: var(--db-red);
+            font-size: 22px;
+            margin-bottom: 12px;
+            margin-top: 0;
+            font-weight: 700;
+        }
+
+        .persona-card strong {
+            color: var(--db-navy);
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        /* Collapsible */
+        .collapsible {
+            background: var(--color-bg-secondary);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        .collapsible-header {
+            background: var(--color-bg);
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .collapsible-header:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        .collapsible-header h4 {
+            color: var(--db-navy);
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .collapsible-icon {
+            font-size: 20px;
+            color: var(--db-red);
+            transition: transform 0.3s ease;
+            font-weight: bold;
+        }
+
+        .collapsible.active .collapsible-icon {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 24px;
+        }
+
+        .collapsible.active .collapsible-content {
+            max-height: 3000px;
+            padding: 24px;
+        }
+
+        /* Architecture Images */
+        .architecture-img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            margin: 24px 0;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 1px solid var(--color-border);
+        }
+
+        .architecture-img:hover {
+            transform: scale(1.01);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 15px;
+        }
+
+        thead {
+            background: var(--db-navy);
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-family: var(--font-heading);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .tech-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: var(--db-green);
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: var(--font-body);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--db-gray-900);
+            color: #00FF88;
+            padding: 24px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 24px 0;
+            line-height: 1.6;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 30, 60, 0.95);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            margin: 2% auto;
+            display: block;
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 40px;
+            right: 60px;
+            color: white;
+            font-size: 48px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--db-red);
+        }
+
+        /* Feature List */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .feature-item {
+            background: var(--color-bg);
+            padding: 24px;
+            border-radius: 8px;
+            border: 2px solid var(--color-border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            border-color: var(--db-red);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .feature-item strong {
+            display: block;
+            color: var(--db-navy);
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .feature-item p {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        /* Catalog Tree */
+        .catalog-root {
+            background: var(--color-bg-secondary);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid var(--db-red);
+        }
+
+        .catalog-title {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--db-red);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .catalog-title::before {
+            content: "📁";
+            font-size: 24px;
+        }
+
+        .schema-group {
+            margin-left: 0;
+            margin-bottom: 24px;
+        }
+
+        .schema-header {
+            background: var(--db-navy);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .schema-header:hover {
+            background: var(--db-red);
+            transform: translateX(2px);
+        }
+
+        .schema-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .schema-title::before {
+            content: "📂";
+            font-size: 18px;
+        }
+
+        .schema-toggle {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .schema-group.collapsed .schema-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .table-list {
+            margin-left: 40px;
+            display: grid;
+            gap: 10px;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .schema-group.collapsed .table-list {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+
+        .table-item {
+            background: var(--color-bg);
+            border-left: 3px solid var(--db-green);
+            padding: 12px 16px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            border: 1px solid var(--color-border);
+        }
+
+        .table-item:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+            border-left-color: var(--db-red);
+        }
+
+        .table-name {
+            font-family: var(--font-body);
+            font-weight: 600;
+            color: var(--db-navy);
+            font-size: 15px;
+        }
+
+        .table-description {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .table-count {
+            background: var(--db-gray-100);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            font-family: var(--font-body);
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .header-subtitle {
+                font-size: 16px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .section {
+                padding: 24px;
+            }
+
+            .section h2 {
+                font-size: 24px;
+            }
+
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .table-list {
+                margin-left: 20px;
+            }
+
+            .table-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>APEX Energy Trading & Risk Management Platform</h1>
+            <p class="header-subtitle">Enterprise-grade Databricks platform for multi-market energy trading, ML-powered forecasting, and real-time risk analytics</p>
+            <div class="badge-container">
+                <span class="badge">NEM Australia</span>
+                <span class="badge">ERCOT Texas</span>
+                <span class="badge">EPEX Europe</span>
+                <span class="badge">Real-time Analytics</span>
+                <span class="badge">ML Forecasting</span>
+                <span class="badge">Unity Catalog</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="showTab('architecture')">Architecture</button>
+            <button class="tab-btn" onclick="showTab('screens')">Application Screens</button>
+            <button class="tab-btn" onclick="showTab('features')">Features & Capabilities</button>
+            <button class="tab-btn" onclick="showTab('technical')">Technical Stack</button>
+            <button class="tab-btn" onclick="showTab('data')">Data Architecture</button>
+        </nav>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="section">
+                <h2>Platform Overview</h2>
+                <p style="font-size: 18px; line-height: 1.8; margin-bottom: 32px; color: var(--color-text-primary);">
+                    APEX is an enterprise demo Energy Trading and Risk Management platform built on Databricks,
+                    showcasing real-time trading capabilities, ML-powered price forecasting, and advanced risk analytics
+                    across three major global energy markets.
+                </p>
+
+                <div class="grid-3">
+                    <div class="metric-card">
+                        <h3>3</h3>
+                        <p>Global Energy Markets</p>
+                    </div>
+                    <div class="metric-card green">
+                        <h3>4</h3>
+                        <p>Specialized Personas</p>
+                    </div>
+                    <div class="metric-card blue">
+                        <h3>111K+</h3>
+                        <p>Market Data Records</p>
+                    </div>
+                </div>
+
+                <h3>Key Benefits</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Unified Multi-Market Platform</h4>
+                        <p>Trade across NEM Australia, ERCOT Texas, and EPEX Europe from a single unified interface with market-specific analytics and strategies.</p>
+                    </div>
+                    <div class="card">
+                        <h4>ML-Powered Forecasting</h4>
+                        <p>Gradient Boosting and LSTM models deliver accurate price and demand predictions with MLflow tracking and lineage.</p>
+                    </div>
+                    <div class="card">
+                        <h4>Real-Time Risk Analytics</h4>
+                        <p>Monte Carlo VaR with 10,000 simulation paths provides portfolio risk assessment and stress testing.</p>
+                    </div>
+                    <div class="card">
+                        <h4>BESS Dispatch Optimization</h4>
+                        <p>ML-powered battery dispatch recommendations maximize revenue through intelligent offer stack generation.</p>
+                    </div>
+                </div>
+
+                <h3>Supported Markets</h3>
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>NEM (National Electricity Market) - Australia</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul>
+                            <li><strong>Market Operator:</strong> AEMO (Australian Energy Market Operator)</li>
+                            <li><strong>Data Sources:</strong> NEMWEB pre-dispatch and dispatch feeds</li>
+                            <li><strong>Coverage:</strong> Real-time pricing, demand forecasts, participant trading data</li>
+                            <li><strong>Update Frequency:</strong> 5-minute dispatch intervals, hourly pre-dispatch</li>
+                            <li><strong>Key Metrics:</strong> Regional demand, spot prices, interconnector flows</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>ERCOT (Electric Reliability Council of Texas)</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul>
+                            <li><strong>Market Coverage:</strong> Texas electricity market (90% of state's load)</li>
+                            <li><strong>Data Sources:</strong> Settlement Point Prices (SPP), DAM, hour-ahead schedules</li>
+                            <li><strong>Pricing Types:</strong> Real-time, day-ahead, hour-ahead markets</li>
+                            <li><strong>Renewable Integration:</strong> Wind and solar generation forecasts</li>
+                            <li><strong>Key Metrics:</strong> Load zone prices, congestion, renewable generation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>EPEX (European Power Exchange)</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <ul>
+                            <li><strong>Market Coverage:</strong> France, Germany, Belgium, Netherlands, Austria, Switzerland</li>
+                            <li><strong>Auction Types:</strong> Day-ahead and intraday continuous trading</li>
+                            <li><strong>Data Sources:</strong> Auction results, cross-border flow allocations</li>
+                            <li><strong>Renewable Tracking:</strong> Solar and wind generation forecasts across regions</li>
+                            <li><strong>Key Metrics:</strong> Country-specific pricing, cross-border capacity, renewable penetration</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture Tab -->
+        <div id="architecture" class="tab-content">
+            <div class="section">
+                <h2>Architecture Diagrams</h2>
+
+                <h3>Executive-Level Architecture</h3>
+                <p>Business-focused view emphasizing strategic value and decision flows across 5 key zones.</p>
+                <img src="apex_etrm_executive_architecture.png"
+                     alt="APEX Executive Architecture"
+                     class="architecture-img"
+                     onclick="openModal(this.src)">
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Zone 1: Market Data Sources</h4>
+                        <ul>
+                            <li>Global energy markets (NEM, ERCOT, EPEX)</li>
+                            <li>Real-time pricing and dispatch signals</li>
+                            <li>Weather and demand drivers</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 2: Intelligence Platform</h4>
+                        <ul>
+                            <li>Multi-market data foundation</li>
+                            <li>Governed Lakehouse</li>
+                            <li>Real-time data quality checks</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 3: Intelligence & Forecasting</h4>
+                        <ul>
+                            <li>ML-powered price forecasting</li>
+                            <li>Demand and supply prediction</li>
+                            <li>Multi-market scenario intelligence</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 4: Trading Applications</h4>
+                        <ul>
+                            <li>Multi-persona trading workspace</li>
+                            <li>Real-time risk dashboards</li>
+                            <li>BESS dispatch optimization</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 60px;">Architect-Level Architecture</h3>
+                <p>Technical architecture showing Databricks components and data flows.</p>
+                <img src="apex_etrm_architect_architecture.png"
+                     alt="APEX Architect Architecture"
+                     class="architecture-img"
+                     onclick="openModal(this.src)">
+
+                <div class="grid-3">
+                    <div class="card">
+                        <h4>Zone 1: External Data Sources</h4>
+                        <ul>
+                            <li>REST API collectors</li>
+                            <li>Market-specific feeds</li>
+                            <li>Weather correlation data</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 2: Lakehouse Foundation</h4>
+                        <ul>
+                            <li>Medallion architecture (Bronze/Silver/Gold)</li>
+                            <li>Unity Catalog governance</li>
+                            <li>Data quality monitoring</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 3: ML Model Factory</h4>
+                        <ul>
+                            <li>Feature engineering layer</li>
+                            <li>MLflow experiment tracking</li>
+                            <li>Champion/challenger testing</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 4: Analytics Engines</h4>
+                        <ul>
+                            <li>Monte Carlo VaR (10K paths)</li>
+                            <li>Strategy backtesting framework</li>
+                            <li>BESS dispatch optimization</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 5: Application Layer</h4>
+                        <ul>
+                            <li>Databricks Apps (React + FastAPI)</li>
+                            <li>4 specialized consoles</li>
+                            <li>Real-time data refresh</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Zone 6: Orchestration</h4>
+                        <ul>
+                            <li>Databricks Workflows</li>
+                            <li>Model drift monitoring</li>
+                            <li>Audit logs and lineage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Screens Tab -->
+        <div id="screens" class="tab-content">
+            <div class="section">
+                <h2>Application Screens & Personas</h2>
+                <p style="font-size: 18px; margin-bottom: 32px;">
+                    APEX features a multi-persona workspace with four specialized consoles tailored to different user roles.
+                </p>
+
+                <div class="grid-2">
+                    <div class="persona-card">
+                        <h3>Trader Console</h3>
+                        <strong>Trading Blotter</strong>
+                        <ul>
+                            <li>Real-time trade execution monitoring</li>
+                            <li>Live P&L and MTM calculations</li>
+                            <li>Position tracking across markets</li>
+                            <li>Trade ID, instrument, direction, volume, price</li>
+                            <li>Session-level P&L aggregation</li>
+                        </ul>
+                        <p style="margin-top: 16px;"><strong>Key Metrics:</strong> Trade ID, Instrument, Direction, MW, Price, MTM P&L</p>
+                    </div>
+
+                    <div class="persona-card">
+                        <h3>Risk Manager Console</h3>
+                        <strong>Risk Dashboard</strong>
+                        <ul>
+                            <li>Portfolio VaR 95% and 99% metrics</li>
+                            <li>Position value and exposure tracking</li>
+                            <li>Limit utilization monitoring</li>
+                            <li>VaR 99% 30-day trend chart with axes and legend</li>
+                            <li>Price forecast bar charts (60-hour horizon)</li>
+                            <li>Stress scenario testing</li>
+                            <li>Monte Carlo simulation dashboard</li>
+                        </ul>
+                        <p style="margin-top: 16px;"><strong>Key Features:</strong> Monte Carlo VaR (10,000 paths), stress tests, limit monitoring</p>
+                    </div>
+
+                    <div class="persona-card">
+                        <h3>Quant Analyst Console</h3>
+                        <strong>Quant Console</strong>
+                        <ul>
+                            <li>Model performance tracking (MAPE, RMSE, R²)</li>
+                            <li>Strategy backtesting results</li>
+                            <li>Model lineage and feature tracking</li>
+                            <li>Forecast vs Actual comparison charts</li>
+                            <li>Champion/challenger model analysis</li>
+                            <li>Backtest metrics: win rate, Sharpe ratio, total P&L</li>
+                        </ul>
+                        <p style="margin-top: 16px;"><strong>ML Models:</strong> Gradient Boosting, LSTM, MLflow tracking</p>
+                    </div>
+
+                    <div class="persona-card">
+                        <h3>Dispatch Operator Console</h3>
+                        <strong>Dispatch Console</strong>
+                        <ul>
+                            <li>BESS fleet monitoring</li>
+                            <li>Offer stack builder (10 price bands)</li>
+                            <li>ML-powered dispatch recommendations</li>
+                            <li>Pre-dispatch price forecasts</li>
+                            <li>Asset-level optimization</li>
+                            <li>Historical stack performance tracking</li>
+                        </ul>
+                        <p style="margin-top: 16px;"><strong>Optimization:</strong> ML recommendations, confidence scores, target MW</p>
+                    </div>
+                </div>
+
+                <h3>A Day in the Life: Persona Workflows</h3>
+                <p style="margin-bottom: 24px; color: var(--color-text-secondary);">
+                    See how each persona uses APEX throughout their typical workday to make data-driven decisions.
+                </p>
+
+                <div class="grid-2">
+                    <div class="card" style="border-left-color: var(--db-blue);">
+                        <h4 style="color: var(--db-blue);">Sarah - Energy Trader</h4>
+                        <p style="margin-bottom: 12px;"><strong>06:30 AM - Market Open Preparation</strong></p>
+                        <p>Sarah arrives at her desk and launches APEX. She switches to the NEM market view and immediately checks her Trading Blotter for overnight positions. The dashboard shows she's holding 150 MW exposure from yesterday's trades at an average price of $85/MWh. Current MTM P&L is showing +$2,340.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-blue); font-size: 14px;">
+                            <strong>Databricks Value:</strong> SQL Warehouse provides sub-second query response times on the apex_fresh.trading.trades table with 50K+ historical records. Unity Catalog's row-level security ensures Sarah only sees trades she's authorized to view, while Delta Lake's ACID transactions guarantee data consistency even as new trades stream in from overnight automated systems.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>08:00 AM - Pre-Dispatch Analysis</strong></p>
+                        <p>Looking at the 60-hour price forecast bar chart, Sarah notices a price spike predicted for 2 PM today (red bars indicating >75% of max price). She decides to execute a sell order to capitalize on the expected peak. Using the market selector, she quickly compares NEM pricing with ERCOT to identify arbitrage opportunities.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-blue); font-size: 14px;">
+                            <strong>Databricks Value:</strong> The forecast Sarah views comes from an MLflow-registered LSTM model that ran automatically at 6 AM via Databricks Workflows. The scheduled job ingested fresh market data from AEMO's NEMWEB API, processed it through the medallion architecture (Bronze → Silver → Gold), and generated predictions—all without manual intervention. Model lineage tracked in MLflow shows exactly which training run produced these forecasts, ensuring full auditability for regulatory compliance.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>02:00 PM - Active Trading</strong></p>
+                        <p>The price spike arrives as predicted. Sarah executes three sell orders totaling 200 MW at $142/MWh. The Trading Blotter updates in real-time, showing each trade with immediate MTM calculations. Her session P&L climbs to +$8,750. She hovers over the "MTM P&L" metric and the tooltip displays: "Source: apex_fresh.trading.trades | Calculation: (current_spot_price - trade_price) × volume_mw | Updated: Real-time via SQL Warehouse".</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-blue); font-size: 14px;">
+                            <strong>Databricks Value:</strong> Each trade Sarah executes is written to Delta Lake with ACID guarantees—no duplicate trades, no data loss. The FastAPI backend queries the SQL Warehouse in real-time to compute MTM valuations across her entire portfolio. Unity Catalog's audit logs capture every trade execution with timestamp, user identity, and IP address for compliance reporting. The data dictionary tooltips pull metadata from Unity Catalog's table/column comments, ensuring Sarah always knows the data source and calculation methodology.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>04:30 PM - End of Day Review</strong></p>
+                        <p>Sarah reviews her trading blotter for the day: 12 total trades executed, net position reduced to 50 MW, final session P&L of +$9,120. She filters trades by instrument and sorts by profitability to identify which strategies worked best. The blotter shows complete lineage: which ML forecast informed each trade, what the predicted vs. actual price was, and the exact model version from MLflow.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-blue); font-size: 14px;">
+                            <strong>Databricks Value:</strong> Databricks Workflows automatically run end-of-day reconciliation jobs at 5 PM, comparing Sarah's trade records against external settlement data, flagging any discrepancies for review. The serverless compute scales down after processing, minimizing costs. All trade data is retained in Delta Lake with time travel enabled, allowing Sarah to query historical states for regulatory audits going back months.
+                        </p>
+                    </div>
+
+                    <div class="card" style="border-left-color: var(--db-red);">
+                        <h4 style="color: var(--db-red);">Michael - Risk Manager</h4>
+                        <p style="margin-bottom: 12px;"><strong>07:00 AM - Risk Assessment</strong></p>
+                        <p>Michael starts his day by reviewing the Risk Dashboard. He checks the four key risk metrics: Portfolio VaR 95% is at $45,230, VaR 99% at $67,890, Position Value at $428,000, and Limit Utilization at 73.2%. The VaR 99% 30-day trend chart shows risk has been increasing over the past week—data automatically aggregated from apex_fresh.trading.var_calculations table.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-red); font-size: 14px;">
+                            <strong>Databricks Value:</strong> A Databricks Workflow job runs every night at 2 AM to compute VaR across the entire portfolio using Monte Carlo simulation (10,000 paths). The job leverages serverless compute that auto-scales based on position volume—last night's run processed 2,500 positions across 3 markets in just 8 minutes. Results are written to Delta Lake tables with automatic versioning, allowing Michael to compare risk metrics across any historical date using time travel queries.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>09:30 AM - Monte Carlo Simulation</strong></p>
+                        <p>Concerned about rising volatility, Michael adjusts the VaR parameters. He updates spot price to $96 and volatility to 0.15, then clicks "Refresh VaR" to run a new Monte Carlo simulation with 10,000 paths. The backend FastAPI service triggers an on-demand Databricks Job via the Jobs API. Within 45 seconds, results appear: VaR 99% has increased to $78,450, triggering an automated warning. He reviews the stress scenarios panel showing impact of various market shocks (±20% price movements, volatility spikes).</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-red); font-size: 14px;">
+                            <strong>Databricks Value:</strong> The on-demand VaR calculation runs on ephemeral Databricks compute that spins up in seconds, executes the Python Monte Carlo simulation using NumPy/Pandas, and terminates automatically—Michael only pays for the 45 seconds of compute used. Unity Catalog governance ensures the calculation accesses only the positions Michael is authorized to see (column-level filtering on trader_id). The simulation code is versioned in MLflow, so every VaR calculation is reproducible and auditable.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>11:00 AM - Limit Monitoring</strong></p>
+                        <p>The Limit Monitor table shows portfolio VaR approaching the $500,000 limit. Michael filters by trader scope using the dropdown to identify that two traders—Sarah and Alex—account for 60% of current risk exposure. Unity Catalog's row-level security ensures he can see aggregated risk but not individual trade details unless he has explicit permissions. He prepares a briefing for the trading desk about position reduction strategies.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-red); font-size: 14px;">
+                            <strong>Databricks Value:</strong> SQL Warehouse executes complex aggregation queries across apex_fresh.trading.positions with sub-second latency, joining position data with trader metadata from apex_fresh.trading.traders. Unity Catalog's attribute-based access control (ABAC) automatically filters results based on Michael's role—he sees risk aggregations but individual trader PII is masked unless explicitly granted. Delta Lake's liquid clustering on trader_id ensures queries are optimized even as the positions table grows to millions of rows.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>03:00 PM - Daily Risk Report</strong></p>
+                        <p>Michael exports the VaR dashboard and stress scenarios for the daily risk committee report. He clicks on the model lineage link, which opens a view showing the complete data flow: NEMWEB API → Bronze ingestion (Workflow job: nemweb_predispatch_job) → Silver cleansing → LSTM model inference (MLflow run: lstm-nem-20260323-0600, R²=0.94) → VaR calculation (Python Monte Carlo). Every step is logged in Unity Catalog's lineage graph, with timestamps, data quality checks, and responsible job IDs.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-red); font-size: 14px;">
+                            <strong>Databricks Value:</strong> Unity Catalog's automated data lineage captures the entire flow from raw market data to VaR output without any manual instrumentation. Auditors can trace any VaR calculation back to source data, model versions, and transformation logic. MLflow integration shows which model training run generated the forecasts used in VaR—including hyperparameters, training data date ranges, and performance metrics. Databricks' Audit Logs track every query Michael ran, providing an immutable compliance trail for regulatory reporting (MiFID II, Dodd-Frank).
+                        </p>
+                    </div>
+
+                    <div class="card" style="border-left-color: var(--db-green);">
+                        <h4 style="color: var(--db-green);">Dr. Emily - Quant Analyst</h4>
+                        <p style="margin-bottom: 12px;"><strong>08:00 AM - Model Performance Review</strong></p>
+                        <p>Emily opens the Quant Console and immediately checks overnight model performance metrics stored in apex_fresh.trading.model_performance. The Gradient Boosting model for NEM shows MAPE of 3.2%, RMSE of 4.8, and R² of 0.94—excellent accuracy maintained since deployment. However, the ERCOT model's MAPE has drifted to 5.8% (up from 4.1% last week), indicating potential model degradation. The dashboard automatically flags this in red, pulling thresholds from Unity Catalog table properties.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-green); font-size: 14px;">
+                            <strong>Databricks Value:</strong> Model performance evaluation runs automatically every morning via a Databricks Workflow scheduled at 7 AM. The job queries predictions from apex_fresh.trading.model_predictions and compares them against actual market outcomes from apex_fresh.market_ercot.spp_realtime, computing MAPE/RMSE/R² metrics using PySpark. Delta Lake ensures atomic writes—even if the job fails mid-execution, the model_performance table remains consistent. MLflow integration auto-logs these metrics to the experiment tracking UI, creating a time-series view of model accuracy trends across all deployed models.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>10:00 AM - Model Lineage Investigation</strong></p>
+                        <p>Emily clicks the "View Lineage" link next to the ERCOT model, which opens the MLflow UI showing the complete model lineage. She traces the model back to training run ID "lstm-ercot-20260320-0200" with feature hash "7f3a9b2c...". The training metadata shows it used data from Feb 20 - Mar 21, excluding the past two days when unusual weather patterns emerged (late-season cold front). She decides to retrain with extended historical data including similar weather events from 2024-2025.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-green); font-size: 14px;">
+                            <strong>Databricks Value:</strong> MLflow automatically captured every detail of the original training run: dataset version (Delta Lake table timestamp), hyperparameters (learning_rate=0.001, hidden_layers=[128,64]), training duration (47 minutes), conda environment specification, and even the Git commit hash of the training code. Emily can click "Re-run" to trigger a new Databricks Workflow job that fetches fresh training data from Delta Lake (with time travel to ensure reproducibility), trains a new LSTM variant, and registers it in MLflow Model Registry—all without writing any orchestration code.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>01:00 PM - Strategy Backtesting</strong></p>
+                        <p>Emily reviews three trading strategies in the backtest results table (apex_fresh.trading.backtests): Mean Reversion (145 trades, 68% win rate, Sharpe 1.8, +$142K P&L), Momentum (89 trades, 71% win rate, Sharpe 2.1, +$98K), and Arbitrage (203 trades, 58% win rate, Sharpe 1.4, +$67K). The Momentum strategy is performing best. She drills down to view individual trades and notes that Momentum outperforms during high-volatility periods. She recommends increasing allocation to Momentum and reducing Mean Reversion exposure.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-green); font-size: 14px;">
+                            <strong>Databricks Value:</strong> The backtest simulations ran overnight as a Databricks Workflow job, processing 5 years of historical market data (3.2M price records from Delta Lake) across 3 strategies in parallel using Apache Spark distributed compute. The job completed in 22 minutes and cost $1.80 in compute—far cheaper and faster than running locally. Results are written to Delta Lake with partition pruning on strategy_name and trade_date, ensuring Emily's queries filter efficiently. Unity Catalog lineage shows exactly which historical price tables fed the backtest, critical for explaining results to the risk committee.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>04:00 PM - Champion/Challenger Testing</strong></p>
+                        <p>Emily sets up a champion/challenger test comparing the current LSTM model (champion) against a new XGBoost variant (challenger). She creates two MLflow experiments—"ercot-production-champion" and "ercot-production-challenger"—and configures a Databricks Workflow to run both models every hour for the next 7 days, scoring predictions in parallel. The workflow will automatically compute comparative metrics (MAPE difference, prediction correlation) and alert her if the challenger outperforms by >10% for 3 consecutive days.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: var(--db-green); font-size: 14px;">
+                            <strong>Databricks Value:</strong> MLflow's Model Registry provides native champion/challenger support—Emily tags the current model as "Champion" and the XGBoost model as "Challenger", both registered under the "ercot-price-forecast" model name. Databricks Workflows uses conditional job logic to route 80% of production traffic to Champion and 20% to Challenger, collecting performance metrics in real-time. Model Serving endpoints (if deployed) would enable seamless A/B testing via traffic splitting. Unity Catalog's governance ensures both models operate under the same data access policies, preventing inconsistencies. After 7 days, Emily can promote the winning model to production with a single API call, and Delta Lake's time travel lets her roll back instantly if issues arise.
+                        </p>
+                    </div>
+
+                    <div class="card" style="border-left-color: #FF8C00;">
+                        <h4 style="color: #FF8C00;">James - Dispatch Operator</h4>
+                        <p style="margin-bottom: 12px;"><strong>05:30 AM - Fleet Status Check</strong></p>
+                        <p>James begins his early morning shift by reviewing the BESS Fleet Monitor. All 5 battery storage assets show "OPERATIONAL" status. He selects Asset BESS-NEM-001 and views the pre-dispatch price strip showing a clear peak opportunity at 2 PM (12-hour forecast visualization).</p>
+                        <p style="margin-top: 8px; font-style: italic; color: #FF8C00; font-size: 14px;">
+                            <strong>Databricks Value:</strong> A Databricks Workflow job named "BESS Fleet Monitor" runs every 15 minutes to aggregate telemetry from all 5 BESS assets. The job queries apex_fresh.trading.dispatch_assets to pull latest state-of-charge (SOC), operational status, and temperature metrics, writing results to a monitoring table. SQL Warehouse provides sub-second refresh for the Fleet Monitor UI, displaying 48-hour telemetry history with automatic liquid clustering on asset_id and timestamp for optimal query performance. The pre-dispatch price forecast James sees is generated by an LSTM model tracked in MLflow (model version bess-lstm-v2.3, registered on 2026-03-19) and refreshed hourly via scheduled job execution.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>06:00 AM - Offer Stack Builder</strong></p>
+                        <p>James uses the 10-band offer stack builder to configure pricing for Asset BESS-NEM-001. He sets progressive pricing across bands: Band 1 at $85/MWh (10 MW), Band 2 at $95 (10 MW), continuing up to Band 10 at $180 (10 MW) for the peak discharge window.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: #FF8C00; font-size: 14px;">
+                            <strong>Databricks Value:</strong> Every offer stack James builds is persisted to the apex_fresh.trading.offer_stacks Delta Lake table with automatic versioning. Delta Lake's time travel capability allows auditors to query historical offer stacks from any past date - for example, "SELECT * FROM offer_stacks VERSION AS OF 30 DAYS AGO WHERE asset_id='BESS-NEM-001'" retrieves all configurations submitted a month ago. Unity Catalog tracks fine-grained lineage showing which forecast model predictions influenced each band's pricing, and row-level security ensures James can only modify offer stacks for assets he's authorized to operate. The offer stack submission triggers a validation job that checks against market participation limits and battery cycle constraints before committing to the Delta table.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>12:00 PM - ML Recommendations Review</strong></p>
+                        <p>The ML recommendations panel suggests "DISCHARGE" action for BESS-NEM-001 at 2 PM with target MW of 85 and confidence score of 0.87. James reviews the recommendation rationale - the LSTM price forecast shows strong peak probability, weather data confirms high demand, and historical stack performance indicates favorable conditions.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: #FF8C00; font-size: 14px;">
+                            <strong>Databricks Value:</strong> The dispatch recommendation engine runs as a Databricks Workflow job triggered on-demand via Jobs API whenever James requests updated guidance. The job executes a PySpark pipeline that joins forecast prices (from MLflow-registered LSTM model), weather features (from apex_fresh.market_nem.weather_forecasts), current SOC levels (from real-time asset telemetry), and historical dispatch performance (from backtested strategy results in Delta Lake). The recommendation algorithm is itself an MLflow-tracked model (dispatch-optimizer-v1.2, champion model since 2026-03-10) with explainability features that generate the rationale text James sees. Unity Catalog's data lineage automatically traces the recommendation back through all source datasets, forecast models, and feature transformations - critical for regulatory compliance when dispatch decisions are audited.
+                        </p>
+
+                        <p style="margin-top: 12px; margin-bottom: 12px;"><strong>02:15 PM - Dispatch Execution & Monitoring</strong></p>
+                        <p>James executes the discharge order following the ML recommendation. The asset successfully dispatches 85 MW during the price peak of $148/MWh. He monitors real-time performance and updates the offer stack for the evening charging window. Asset revenue for the day: $12,580, with asset SOC managed within optimal 20-80% range to preserve battery cycle life.</p>
+                        <p style="margin-top: 8px; font-style: italic; color: #FF8C00; font-size: 14px;">
+                            <strong>Databricks Value:</strong> When James clicks "Execute Dispatch," the action triggers a serverless Databricks job that validates the dispatch order against pre-configured safety limits, writes the execution record to apex_fresh.trading.dispatch_executions with ACID transaction guarantees from Delta Lake, and submits the bid to the NEM market API. Real-time monitoring leverages Databricks SQL Warehouse streaming queries that detect when settlement data arrives (within 5 minutes of dispatch interval), auto-calculating actual revenue by joining dispatch_executions with market settlement prices. Unity Catalog audit logs capture James' user ID, timestamp, and the complete dispatch decision (including ML recommendation accepted/rejected status) - satisfying AEMO (Australian Energy Market Operator) audit requirements. The evening offer stack update James performs is stored with Delta Lake versioning, allowing the team to analyze why revenue today ($12,580) exceeded yesterday ($9,240) by querying historical offer configurations and comparing them against actual price outcomes.
+                        </p>
+                    </div>
+                </div>
+
+                <h3>Screen Features & Interactions</h3>
+                <div class="grid-3">
+                    <div class="card">
+                        <h4>Theme Support</h4>
+                        <p>Light and dark mode themes with persona-specific color schemes (Trader, Risk, Quant, Dispatch)</p>
+                    </div>
+                    <div class="card">
+                        <h4>Market Selector</h4>
+                        <p>Quick switching between NEM, ERCOT, and EPEX markets with market-specific analytics</p>
+                    </div>
+                    <div class="card">
+                        <h4>Interactive Tooltips</h4>
+                        <p>Interactive tooltips on all metrics showing definitions, data sources, and calculations</p>
+                    </div>
+                    <div class="card">
+                        <h4>Real-Time Data</h4>
+                        <p>Live data refresh from SQL Warehouse with configurable update intervals</p>
+                    </div>
+                    <div class="card">
+                        <h4>Chart Enhancements</h4>
+                        <p>All charts include axes, grid lines, legends, and color-coded visualizations</p>
+                    </div>
+                    <div class="card">
+                        <h4>Data Dictionary</h4>
+                        <p>Centralized metadata for 30+ metrics with source tables and calculation formulas</p>
+                    </div>
+                </div>
+
+                <h3>Detailed Screen Components</h3>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>Trading Blotter - Live Trade Monitoring</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Description</th>
+                                    <th>Data Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Trade ID</td>
+                                    <td>Unique identifier for each trade execution</td>
+                                    <td>apex_fresh.trading.trades</td>
+                                </tr>
+                                <tr>
+                                    <td>Instrument</td>
+                                    <td>Trading instrument (e.g., NEM-NSW1-SPOT)</td>
+                                    <td>apex_fresh.trading.trades</td>
+                                </tr>
+                                <tr>
+                                    <td>Direction</td>
+                                    <td>Trade direction: BUY or SELL</td>
+                                    <td>apex_fresh.trading.trades</td>
+                                </tr>
+                                <tr>
+                                    <td>MW</td>
+                                    <td>Trade volume in megawatts</td>
+                                    <td>apex_fresh.trading.trades</td>
+                                </tr>
+                                <tr>
+                                    <td>Price</td>
+                                    <td>Execution price in local currency</td>
+                                    <td>apex_fresh.trading.trades</td>
+                                </tr>
+                                <tr>
+                                    <td>MTM P&L</td>
+                                    <td>Mark-to-market profit/loss valuation</td>
+                                    <td>Calculated from current market prices</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>Risk Dashboard - Portfolio Risk Analytics</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>VaR Metrics Panel</h4>
+                        <ul>
+                            <li><strong>Portfolio VaR 95%:</strong> Maximum expected loss at 95% confidence using Monte Carlo simulation</li>
+                            <li><strong>Portfolio VaR 99%:</strong> Maximum expected loss at 99% confidence (10,000 simulation paths)</li>
+                            <li><strong>Position Value:</strong> Total portfolio valuation at current market prices</li>
+                            <li><strong>Limit Utilization:</strong> Percentage of risk limits consumed</li>
+                        </ul>
+
+                        <h4>VaR Dashboard - Interactive Controls</h4>
+                        <ul>
+                            <li>Spot Price Input: Adjust current market price for scenario analysis</li>
+                            <li>Volatility Slider: Set volatility parameter (0.01 - 1.0)</li>
+                            <li>Trader Scope Selector: Filter by trader or view all positions</li>
+                            <li>Refresh VaR Button: Trigger new Monte Carlo simulation</li>
+                        </ul>
+
+                        <h4>Charts & Visualizations</h4>
+                        <ul>
+                            <li><strong>VaR 99% Trend Chart:</strong> 30-day historical trend with Y-axis labels (min/max/mid), X-axis time indicators (30d ago, 15d, Now), grid lines, and legend</li>
+                            <li><strong>Price Forecast:</strong> 60-hour bar chart with color-coded ranges (High >75%, Med 50-75%, Low <50%)</li>
+                            <li><strong>Stress Scenarios:</strong> Impact analysis for market shock scenarios</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>Quant Console - Model Performance & Backtesting</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Model Performance Metrics</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Description</th>
+                                    <th>Formula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>MAPE</td>
+                                    <td>Mean Absolute Percentage Error</td>
+                                    <td>Σ|actual - predicted| / actual / n * 100</td>
+                                </tr>
+                                <tr>
+                                    <td>RMSE</td>
+                                    <td>Root Mean Squared Error</td>
+                                    <td>√(Σ(actual - predicted)² / n)</td>
+                                </tr>
+                                <tr>
+                                    <td>R²</td>
+                                    <td>Coefficient of Determination</td>
+                                    <td>1 - (SS_res / SS_tot)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Strategy Backtest Results</h4>
+                        <ul>
+                            <li><strong>Strategy:</strong> Name of trading strategy (mean reversion, momentum, arbitrage)</li>
+                            <li><strong>Trades:</strong> Number of executed trades in backtest period</li>
+                            <li><strong>Win Rate:</strong> Percentage of profitable trades</li>
+                            <li><strong>Total P&L:</strong> Cumulative profit/loss from strategy</li>
+                            <li><strong>Sharpe Ratio:</strong> Risk-adjusted return metric</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>Dispatch Console - BESS Fleet Optimization</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <h4>Fleet Monitor</h4>
+                        <p>Real-time status of all Battery Energy Storage System (BESS) assets:</p>
+                        <ul>
+                            <li>Asset ID and operational status</li>
+                            <li>Current market selection (NEM/ERCOT/EPEX)</li>
+                            <li>Pre-dispatch price strip (12-hour forecast visualization)</li>
+                            <li>Asset selection for detailed analysis</li>
+                        </ul>
+
+                        <h4>Offer Stack Builder</h4>
+                        <p>10-band price/volume offer stack configuration with progressive pricing and volume allocation</p>
+
+                        <h4>ML Recommendations</h4>
+                        <ul>
+                            <li><strong>Suggested Action:</strong> CHARGE, DISCHARGE, or HOLD recommendation</li>
+                            <li><strong>Target MW:</strong> Optimal volume for recommended action</li>
+                            <li><strong>Confidence Score:</strong> ML model confidence level (0.0 - 1.0)</li>
+                            <li><strong>Model Lineage:</strong> Tracking information for the recommendation model</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features & Capabilities Tab -->
+        <div id="features" class="tab-content">
+            <div class="section">
+                <h2>Core Features & Capabilities</h2>
+
+                <h3>ML-Powered Forecasting</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Price Forecasting Models</h4>
+                        <ul>
+                            <li><strong>Gradient Boosting:</strong> XGBoost models for short-term price prediction</li>
+                            <li><strong>LSTM Networks:</strong> Long Short-Term Memory for pattern recognition</li>
+                            <li><strong>Feature Engineering:</strong> 50+ engineered features including seasonality, weather correlation, historical patterns</li>
+                            <li><strong>Prediction Horizons:</strong> 1-hour, 24-hour, and 48-hour forecasts</li>
+                            <li><strong>Model Updates:</strong> Daily retraining with rolling window validation</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Demand Forecasting</h4>
+                        <ul>
+                            <li>Regional demand predictions</li>
+                            <li>Weather impact modeling</li>
+                            <li>Load curve shape forecasting</li>
+                            <li>Peak demand identification</li>
+                            <li>Renewable generation forecasts</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Risk Management Capabilities</h3>
+                <div class="card">
+                    <h4>Monte Carlo VaR Engine</h4>
+                    <ul>
+                        <li><strong>Simulation Paths:</strong> 10,000 Monte Carlo paths for robust risk estimation</li>
+                        <li><strong>Confidence Levels:</strong> VaR 95%, VaR 99%, and Expected Shortfall metrics</li>
+                        <li><strong>Portfolio Aggregation:</strong> Multi-market, multi-instrument position consolidation</li>
+                        <li><strong>Real-time Calculation:</strong> On-demand VaR recalculation with custom parameters</li>
+                        <li><strong>Stress Testing:</strong> Scenario-based analysis for extreme market conditions</li>
+                        <li><strong>Historical Backtesting:</strong> Validation of VaR models against actual outcomes</li>
+                    </ul>
+                </div>
+
+                <div class="grid-2" style="margin-top: 32px;">
+                    <div class="card">
+                        <h4>Position & Exposure Tracking</h4>
+                        <ul>
+                            <li>Real-time position aggregation</li>
+                            <li>Exposure by market and instrument</li>
+                            <li>Net position calculations</li>
+                            <li>Delta and gamma exposure</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Limit Monitoring</h4>
+                        <ul>
+                            <li>Pre-trade limit checks</li>
+                            <li>Real-time utilization tracking</li>
+                            <li>Breach detection and alerting</li>
+                            <li>Multi-level approval workflows</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Trading Strategy Framework</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <strong>Mean Reversion</strong>
+                        <p>Trade price deviations from historical means</p>
+                    </div>
+                    <div class="feature-item">
+                        <strong>Momentum</strong>
+                        <p>Capitalize on price trend continuation</p>
+                    </div>
+                    <div class="feature-item">
+                        <strong>Arbitrage</strong>
+                        <p>Cross-market price differential opportunities</p>
+                    </div>
+                    <div class="feature-item">
+                        <strong>Volatility</strong>
+                        <p>Trade based on volatility forecasts</p>
+                    </div>
+                </div>
+
+                <h3>BESS Dispatch Optimization</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Fleet Management</h4>
+                        <ul>
+                            <li>Multi-asset optimization across BESS fleet</li>
+                            <li>State of charge (SOC) tracking</li>
+                            <li>Degradation modeling</li>
+                            <li>Cycle life optimization</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Offer Stack Optimization</h4>
+                        <ul>
+                            <li>10-band price/volume optimization</li>
+                            <li>Market price forecast integration</li>
+                            <li>Revenue maximization algorithms</li>
+                            <li>Constraint satisfaction (capacity, ramp rates)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Data Quality & Governance</h3>
+                <div class="grid-3">
+                    <div class="card">
+                        <h4>Data Validation</h4>
+                        <ul>
+                            <li>Schema enforcement</li>
+                            <li>Range checks on prices</li>
+                            <li>Completeness validation</li>
+                            <li>Duplicate detection</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Unity Catalog Security</h4>
+                        <ul>
+                            <li>Row and column-level security</li>
+                            <li>Attribute-based access control</li>
+                            <li>Data lineage tracking</li>
+                            <li>Audit logging</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Compliance & Audit</h4>
+                        <ul>
+                            <li>Audit trail</li>
+                            <li>Regulatory reporting</li>
+                            <li>Trade reconciliation</li>
+                            <li>Model validation logs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>API Integration</h3>
+                <p style="margin-bottom: 24px; color: var(--color-text-secondary);">
+                    RESTful API endpoints for programmatic access to market data, trading operations, risk analytics, and ML models.
+                </p>
+
+                <div class="grid-2">
+                    <div class="card" style="border-left: 4px solid var(--db-blue);">
+                        <h4 style="color: var(--db-blue); margin-bottom: 16px;">Market Data API</h4>
+                        <div style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/market/{market}/summary</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Current market summary
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/market/{market}/predispatch</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Pre-dispatch forecasts (1-48 hours)
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/market/{market}/spot-price</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px;">
+                                Real-time spot pricing
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="border-left: 4px solid var(--db-red);">
+                        <h4 style="color: var(--db-red); margin-bottom: 16px;">Trading API</h4>
+                        <div style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/trading/blotter</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Live trading blotter
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/trading/positions</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Current positions
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: #FF8C00; font-weight: 600;">POST</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/trading/execute</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px;">
+                                Trade execution
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="border-left: 4px solid #8B0000;">
+                        <h4 style="color: #8B0000; margin-bottom: 16px;">Risk API</h4>
+                        <div style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: #FF8C00; font-weight: 600;">POST</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/risk/var</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                VaR calculation (Monte Carlo)
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/risk/limits</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Limit monitoring
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/risk/stress-scenarios</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px;">
+                                Stress testing
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="border-left: 4px solid var(--db-green);">
+                        <h4 style="color: var(--db-green); margin-bottom: 16px;">ML & Analytics API</h4>
+                        <div style="font-family: var(--font-mono); font-size: 13px; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/models/performance</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Model metrics (MAPE, RMSE, R²)
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/models/lineage</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px; margin-bottom: 12px;">
+                                Model tracking
+                            </div>
+
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: var(--db-green); font-weight: 600;">GET</span>
+                                <span style="margin-left: 8px; color: var(--color-text-primary);">/api/backtests</span>
+                            </div>
+                            <div style="margin-left: 40px; color: var(--color-text-tertiary); font-size: 12px;">
+                                Strategy backtests
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 24px; padding: 16px; background: var(--color-bg-surface); border-left: 4px solid var(--db-blue); border-radius: 4px;">
+                    <h4 style="margin-top: 0; color: var(--db-blue);">Authentication & Rate Limits</h4>
+                    <div class="grid-2" style="gap: 16px;">
+                        <div>
+                            <p style="margin: 8px 0;"><strong>Authentication:</strong> Bearer token (JWT)</p>
+                            <p style="margin: 8px 0;"><strong>Authorization:</strong> Unity Catalog RBAC</p>
+                        </div>
+                        <div>
+                            <p style="margin: 8px 0;"><strong>Rate Limit:</strong> 1000 requests/minute</p>
+                            <p style="margin: 8px 0;"><strong>Response Format:</strong> JSON</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Stack Tab -->
+        <div id="technical" class="tab-content">
+            <div class="section">
+                <h2>Technical Stack & Architecture</h2>
+
+                <h3>Databricks Platform Services</h3>
+                <div class="tech-stack">
+                    <span class="tech-badge">Unity Catalog</span>
+                    <span class="tech-badge">Databricks SQL</span>
+                    <span class="tech-badge">Databricks Workflows</span>
+                    <span class="tech-badge">Databricks Apps</span>
+                    <span class="tech-badge">MLflow</span>
+                    <span class="tech-badge">Delta Lake</span>
+                    <span class="tech-badge">Serverless Compute</span>
+                </div>
+
+                <h3>Application Stack</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Frontend Technologies</h4>
+                        <div class="tech-stack">
+                            <span class="tech-badge">React 18</span>
+                            <span class="tech-badge">TypeScript</span>
+                            <span class="tech-badge">Vite</span>
+                            <span class="tech-badge">TanStack Query</span>
+                            <span class="tech-badge">TanStack Table</span>
+                            <span class="tech-badge">Zustand</span>
+                        </div>
+                        <ul style="margin-top: 20px;">
+                            <li>React 18 with TypeScript for type-safe UI development</li>
+                            <li>Vite build system for fast development and optimized production builds</li>
+                            <li>TanStack Query for server state management and caching</li>
+                            <li>TanStack Table for high-performance data grids</li>
+                            <li>Zustand for lightweight client state management</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Backend Technologies</h4>
+                        <div class="tech-stack">
+                            <span class="tech-badge">Python 3.11</span>
+                            <span class="tech-badge">FastAPI</span>
+                            <span class="tech-badge">Pydantic</span>
+                            <span class="tech-badge">Databricks SQL Connector</span>
+                        </div>
+                        <ul style="margin-top: 20px;">
+                            <li>FastAPI for high-performance REST API endpoints</li>
+                            <li>Pydantic for data validation and serialization</li>
+                            <li>Async/await patterns for non-blocking I/O</li>
+                            <li>Databricks SQL Connector for warehouse queries</li>
+                            <li>CORS middleware for secure cross-origin requests</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Data Processing & ML</h3>
+                <div class="grid-3">
+                    <div class="card">
+                        <h4>ML Libraries</h4>
+                        <div class="tech-stack" style="flex-direction: column; align-items: flex-start;">
+                            <span class="tech-badge">XGBoost</span>
+                            <span class="tech-badge">TensorFlow</span>
+                            <span class="tech-badge">scikit-learn</span>
+                            <span class="tech-badge">pandas</span>
+                            <span class="tech-badge">NumPy</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>Data Processing</h4>
+                        <div class="tech-stack" style="flex-direction: column; align-items: flex-start;">
+                            <span class="tech-badge">PySpark</span>
+                            <span class="tech-badge">Delta Lake</span>
+                            <span class="tech-badge">Pandas</span>
+                            <span class="tech-badge">Polars</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>ML Ops</h4>
+                        <div class="tech-stack" style="flex-direction: column; align-items: flex-start;">
+                            <span class="tech-badge">MLflow Tracking</span>
+                            <span class="tech-badge">MLflow Models</span>
+                            <span class="tech-badge">MLflow Registry</span>
+                            <span class="tech-badge">Model Serving</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Data Architecture</h3>
+                <div class="card">
+                    <h4>Medallion Architecture</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Layer</th>
+                                <th>Schema</th>
+                                <th>Purpose</th>
+                                <th>Processing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Bronze</td>
+                                <td>market_nem, market_ercot, market_epex</td>
+                                <td>Raw market feeds (landing zone)</td>
+                                <td>Schema enforcement, deduplication</td>
+                            </tr>
+                            <tr>
+                                <td>Silver</td>
+                                <td>silver_energy</td>
+                                <td>Cleansed and standardized data</td>
+                                <td>Data quality, transformations, standardization</td>
+                            </tr>
+                            <tr>
+                                <td>Gold</td>
+                                <td>trading</td>
+                                <td>Business-ready analytics tables</td>
+                                <td>Aggregations, feature engineering, modeling</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Infrastructure & Deployment</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Compute Resources</h4>
+                        <ul>
+                            <li><strong>SQL Warehouse:</strong> Medium (2X-Small) for interactive queries</li>
+                            <li><strong>Job Clusters:</strong> Auto-scaling for batch workloads</li>
+                            <li><strong>Serverless:</strong> On-demand compute for Apps</li>
+                            <li><strong>Model Serving:</strong> Real-time endpoint provisioning</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Orchestration</h4>
+                        <ul>
+                            <li><strong>Databricks Workflows:</strong> Scheduled job execution</li>
+                            <li><strong>Job Dependencies:</strong> DAG-based task orchestration</li>
+                            <li><strong>Monitoring:</strong> Email and webhook notifications</li>
+                            <li><strong>Retry Logic:</strong> Automatic failure recovery</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>API Integration</h3>
+                <div class="code-block"># Market Data API Endpoints
+/api/market/{market}/summary          # Current market summary
+/api/market/{market}/predispatch      # Pre-dispatch forecasts
+/api/market/{market}/spot-price       # Real-time spot pricing
+
+# Trading API Endpoints
+/api/trading/blotter                  # Live trading blotter
+/api/trading/positions                # Current positions
+/api/trading/execute                  # Trade execution
+
+# Risk API Endpoints
+/api/risk/var                         # VaR calculation
+/api/risk/limits                      # Limit monitoring
+/api/risk/stress-scenarios            # Stress testing
+
+# ML & Analytics Endpoints
+/api/models/performance               # Model metrics
+/api/models/lineage                   # Model tracking
+/api/backtests                        # Strategy backtests</div>
+            </div>
+        </div>
+
+        <!-- Data Architecture Tab -->
+        <div id="data" class="tab-content">
+            <div class="section">
+                <h2>Data Architecture & Catalog</h2>
+
+                <h3>Unity Catalog Structure</h3>
+                <p style="margin-bottom: 16px; color: var(--color-text-secondary);">Click on any schema to expand or collapse table details</p>
+
+                <div class="catalog-root">
+                    <div class="catalog-title">apex_fresh</div>
+
+                    <div class="schema-group">
+                        <div class="schema-header" onclick="toggleSchema(this)">
+                            <div class="schema-title">market_nem</div>
+                            <span class="schema-toggle">▼</span>
+                        </div>
+                        <div class="table-list">
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">predispatch_prices</div>
+                                    <div class="table-description">Pre-dispatch price forecasts</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">dispatch_actual</div>
+                                    <div class="table-description">Actual dispatch prices</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">demand_forecast</div>
+                                    <div class="table-description">Demand predictions</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">participant_trading</div>
+                                    <div class="table-description">Participant data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schema-group">
+                        <div class="schema-header" onclick="toggleSchema(this)">
+                            <div class="schema-title">market_ercot</div>
+                            <span class="schema-toggle">▼</span>
+                        </div>
+                        <div class="table-list">
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">spp_realtime</div>
+                                    <div class="table-description">Settlement Point Prices (real-time)</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">dam_prices</div>
+                                    <div class="table-description">Day-ahead market prices</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">wind_forecast</div>
+                                    <div class="table-description">Wind generation forecasts</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">load_forecast</div>
+                                    <div class="table-description">Load forecasts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schema-group">
+                        <div class="schema-header" onclick="toggleSchema(this)">
+                            <div class="schema-title">market_epex</div>
+                            <span class="schema-toggle">▼</span>
+                        </div>
+                        <div class="table-list">
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">day_ahead_auction</div>
+                                    <div class="table-description">Day-ahead auction results</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">intraday_continuous</div>
+                                    <div class="table-description">Intraday trading results</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">cross_border_flows</div>
+                                    <div class="table-description">Interconnector flows</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">renewable_generation</div>
+                                    <div class="table-description">Renewable generation data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="schema-group">
+                        <div class="schema-header" onclick="toggleSchema(this)">
+                            <div class="schema-title">trading</div>
+                            <span class="schema-toggle">▼</span>
+                        </div>
+                        <div class="table-list">
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">trades</div>
+                                    <div class="table-description">Executed trades</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">positions</div>
+                                    <div class="table-description">Current positions</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">model_performance</div>
+                                    <div class="table-description">ML model metrics</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">model_lineage</div>
+                                    <div class="table-description">Model tracking</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">backtests</div>
+                                    <div class="table-description">Strategy backtests</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">var_calculations</div>
+                                    <div class="table-description">VaR results</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">limit_status</div>
+                                    <div class="table-description">Risk limits</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">dispatch_assets</div>
+                                    <div class="table-description">BESS assets</div>
+                                </div>
+                            </div>
+                            <div class="table-item">
+                                <div>
+                                    <div class="table-name">offer_stacks</div>
+                                    <div class="table-description">Dispatch offer stacks</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Key Tables & Schemas</h3>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>market_nem.predispatch_prices</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>interval_start</td>
+                                    <td>TIMESTAMP</td>
+                                    <td>Trading interval start time (UTC)</td>
+                                </tr>
+                                <tr>
+                                    <td>region_id</td>
+                                    <td>STRING</td>
+                                    <td>NEM region (NSW1, QLD1, VIC1, SA1, TAS1)</td>
+                                </tr>
+                                <tr>
+                                    <td>forecast_price</td>
+                                    <td>DECIMAL(10,2)</td>
+                                    <td>Forecasted price (AUD/MWh)</td>
+                                </tr>
+                                <tr>
+                                    <td>demand_forecast</td>
+                                    <td>DECIMAL(10,2)</td>
+                                    <td>Forecasted demand (MW)</td>
+                                </tr>
+                                <tr>
+                                    <td>run_datetime</td>
+                                    <td>TIMESTAMP</td>
+                                    <td>Forecast run timestamp</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Update Frequency:</strong> Hourly | <strong>Retention:</strong> 30 days</p>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>trading.trades</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>trade_id</td>
+                                    <td>BIGINT</td>
+                                    <td>Unique trade identifier</td>
+                                </tr>
+                                <tr>
+                                    <td>instrument_id</td>
+                                    <td>STRING</td>
+                                    <td>Trading instrument (e.g., NEM-NSW1-SPOT)</td>
+                                </tr>
+                                <tr>
+                                    <td>direction</td>
+                                    <td>STRING</td>
+                                    <td>BUY or SELL</td>
+                                </tr>
+                                <tr>
+                                    <td>volume_mw</td>
+                                    <td>DECIMAL(10,2)</td>
+                                    <td>Trade volume in megawatts</td>
+                                </tr>
+                                <tr>
+                                    <td>price</td>
+                                    <td>DECIMAL(10,2)</td>
+                                    <td>Execution price</td>
+                                </tr>
+                                <tr>
+                                    <td>timestamp_utc</td>
+                                    <td>TIMESTAMP</td>
+                                    <td>Trade execution time (UTC)</td>
+                                </tr>
+                                <tr>
+                                    <td>trader</td>
+                                    <td>STRING</td>
+                                    <td>Trader identifier</td>
+                                </tr>
+                                <tr>
+                                    <td>market</td>
+                                    <td>STRING</td>
+                                    <td>Market (NEM, ERCOT, EPEX)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Update Frequency:</strong> Real-time | <strong>Retention:</strong> Indefinite</p>
+                    </div>
+                </div>
+
+                <div class="collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h4>trading.model_performance</h4>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>model_name</td>
+                                    <td>STRING</td>
+                                    <td>ML model identifier</td>
+                                </tr>
+                                <tr>
+                                    <td>market</td>
+                                    <td>STRING</td>
+                                    <td>Target market</td>
+                                </tr>
+                                <tr>
+                                    <td>mape</td>
+                                    <td>DECIMAL(5,2)</td>
+                                    <td>Mean Absolute Percentage Error (%)</td>
+                                </tr>
+                                <tr>
+                                    <td>rmse</td>
+                                    <td>DECIMAL(10,2)</td>
+                                    <td>Root Mean Squared Error</td>
+                                </tr>
+                                <tr>
+                                    <td>r2</td>
+                                    <td>DECIMAL(5,4)</td>
+                                    <td>R-squared coefficient</td>
+                                </tr>
+                                <tr>
+                                    <td>evaluation_date</td>
+                                    <td>DATE</td>
+                                    <td>Performance evaluation date</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 16px;"><strong>Update Frequency:</strong> Daily | <strong>Retention:</strong> 365 days</p>
+                    </div>
+                </div>
+
+                <h3>Data Volumes & Statistics</h3>
+                <div class="grid-3">
+                    <div class="metric-card">
+                        <h3>111,445</h3>
+                        <p>Total Market Records</p>
+                    </div>
+                    <div class="metric-card green">
+                        <h3>30+</h3>
+                        <p>Active Tables</p>
+                    </div>
+                    <div class="metric-card blue">
+                        <h3>3</h3>
+                        <p>Market Schemas</p>
+                    </div>
+                </div>
+
+                <h3>Data Refresh Schedule</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data Source</th>
+                            <th>Update Frequency</th>
+                            <th>Method</th>
+                            <th>Workflow</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>NEM Pre-dispatch</td>
+                            <td>Hourly</td>
+                            <td>REST API + Batch</td>
+                            <td>nemweb_predispatch_job</td>
+                        </tr>
+                        <tr>
+                            <td>ERCOT Real-time Prices</td>
+                            <td>15 minutes</td>
+                            <td>REST API + Streaming</td>
+                            <td>ercot_realtime_job</td>
+                        </tr>
+                        <tr>
+                            <td>EPEX Day-Ahead</td>
+                            <td>Daily (13:00 UTC)</td>
+                            <td>REST API + Batch</td>
+                            <td>epex_dayahead_job</td>
+                        </tr>
+                        <tr>
+                            <td>Model Training</td>
+                            <td>Daily (02:00 UTC)</td>
+                            <td>PySpark + MLflow</td>
+                            <td>model_training_pipeline</td>
+                        </tr>
+                        <tr>
+                            <td>VaR Calculations</td>
+                            <td>On-demand + Daily</td>
+                            <td>Python + Monte Carlo</td>
+                            <td>risk_calculation_job</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Data Lineage & Governance</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Access Controls</h4>
+                        <ul>
+                            <li><strong>Traders:</strong> Read access to market data, write to trades table</li>
+                            <li><strong>Risk Managers:</strong> Read access to all trading and risk tables</li>
+                            <li><strong>Quant Analysts:</strong> Read/write access to model tables, read-only on trades</li>
+                            <li><strong>Dispatch Operators:</strong> Read/write to BESS and dispatch tables</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>Data Quality Metrics</h4>
+                        <ul>
+                            <li><strong>Completeness:</strong> >99.5% of expected records present</li>
+                            <li><strong>Accuracy:</strong> Price data validated against source feeds</li>
+                            <li><strong>Timeliness:</strong> 95% of data available within SLA</li>
+                            <li><strong>Consistency:</strong> Cross-market data reconciliation checks</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleCollapsible(header) {
+            const collapsible = header.parentElement;
+            collapsible.classList.toggle('active');
+        }
+
+        function openModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function toggleSchema(header) {
+            const schemaGroup = header.parentElement;
+            schemaGroup.classList.toggle('collapsed');
+        }
+    </script>
+</body>
+</html>
