@@ -818,7 +818,7 @@
                     </div>
                     <div class="card">
                         <h4>ML-Powered Forecasting</h4>
-                        <p>Gradient Boosting and LSTM models deliver accurate price and demand predictions with MLflow tracking and lineage.</p>
+                        <p>Databricks AutoML delivers accurate price and demand predictions with automated model selection, hyperparameter tuning, MLflow tracking and lineage.</p>
                     </div>
                     <div class="card">
                         <h4>Real-Time Risk Analytics</h4>
@@ -1036,7 +1036,7 @@
                             <li>Champion/challenger model analysis</li>
                             <li>Backtest metrics: win rate, Sharpe ratio, total P&L</li>
                         </ul>
-                        <p style="margin-top: 16px;"><strong>ML Models:</strong> Gradient Boosting, LSTM, MLflow tracking</p>
+                        <p style="margin-top: 16px;"><strong>ML Models:</strong> Databricks AutoML with automated algorithm selection (XGBoost, LightGBM, Random Forest), MLflow tracking</p>
                     </div>
 
                     <div class="persona-card">
@@ -1156,9 +1156,9 @@
                         </p>
 
                         <p style="margin-top: 12px; margin-bottom: 12px;"><strong>12:00 PM - ML Recommendations Review</strong></p>
-                        <p>The ML recommendations panel suggests "DISCHARGE" action for BESS-NEM-001 at 2 PM with target MW of 85 and confidence score of 0.87. James reviews the recommendation rationale - the LSTM price forecast shows strong peak probability, weather data confirms high demand, and historical stack performance indicates favorable conditions.</p>
+                        <p>The ML recommendations panel suggests "DISCHARGE" action for BESS-NEM-001 at 2 PM with target MW of 85 and confidence score of 0.87. James reviews the recommendation rationale - the AutoML price forecast shows strong peak probability, weather data confirms high demand, and historical stack performance indicates favorable conditions.</p>
                         <p style="margin-top: 8px; font-style: italic; color: #FF8C00; font-size: 14px;">
-                            <strong>Databricks Value:</strong> The dispatch recommendation engine runs as a Databricks Workflow job triggered on-demand via Jobs API whenever James requests updated guidance. The job executes a PySpark pipeline that joins forecast prices (from MLflow-registered LSTM model), weather features (from apex_fresh.market_nem.weather_forecasts), current SOC levels (from real-time asset telemetry), and historical dispatch performance (from backtested strategy results in Delta Lake). The recommendation algorithm is itself an MLflow-tracked model (dispatch-optimizer-v1.2, champion model since 2026-03-10) with explainability features that generate the rationale text James sees. Unity Catalog's data lineage automatically traces the recommendation back through all source datasets, forecast models, and feature transformations - critical for regulatory compliance when dispatch decisions are audited.
+                            <strong>Databricks Value:</strong> The dispatch recommendation engine runs as a Databricks Workflow job triggered on-demand via Jobs API whenever James requests updated guidance. The job executes a PySpark pipeline that joins forecast prices (from MLflow-registered AutoML model), weather features (from apex_fresh.market_nem.weather_forecasts), current SOC levels (from real-time asset telemetry), and historical dispatch performance (from backtested strategy results in Delta Lake). The recommendation algorithm is itself an MLflow-tracked model (dispatch-optimizer-v1.2, champion model since 2026-03-10) with explainability features that generate the rationale text James sees. Unity Catalog's data lineage automatically traces the recommendation back through all source datasets, forecast models, and feature transformations - critical for regulatory compliance when dispatch decisions are audited.
                         </p>
 
                         <p style="margin-top: 12px; margin-bottom: 12px;"><strong>02:15 PM - Dispatch Execution & Monitoring</strong></p>
@@ -1365,9 +1365,9 @@
                     <div class="card">
                         <h4>Price Forecasting Models</h4>
                         <ul>
-                            <li><strong>Gradient Boosting:</strong> XGBoost models for short-term price prediction</li>
-                            <li><strong>LSTM Networks:</strong> Long Short-Term Memory for pattern recognition</li>
-                            <li><strong>Feature Engineering:</strong> 50+ engineered features including seasonality, weather correlation, historical patterns</li>
+                            <li><strong>Databricks AutoML:</strong> Automated algorithm selection testing XGBoost, LightGBM, Random Forest for optimal performance</li>
+                            <li><strong>Automated Feature Engineering:</strong> Time-series features including lag variables, rolling averages, seasonality, weather correlation, historical patterns</li>
+                            <li><strong>Hyperparameter Tuning:</strong> Automated optimization with configurable timeout and trial limits</li>
                             <li><strong>Prediction Horizons:</strong> 1-hour, 24-hour, and 48-hour forecasts</li>
                             <li><strong>Model Updates:</strong> Daily retraining with rolling window validation</li>
                         </ul>
@@ -1689,9 +1689,8 @@
                     <div class="card">
                         <h4>ML Libraries</h4>
                         <div class="tech-stack" style="flex-direction: column; align-items: flex-start;">
-                            <span class="tech-badge">XGBoost</span>
-                            <span class="tech-badge">TensorFlow</span>
-                            <span class="tech-badge">scikit-learn</span>
+                            <span class="tech-badge">Databricks AutoML</span>
+                            <span class="tech-badge">MLflow</span>
                             <span class="tech-badge">pandas</span>
                             <span class="tech-badge">NumPy</span>
                         </div>
