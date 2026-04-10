@@ -49,14 +49,14 @@ python3 scripts/verify_data.py
 
 ### 3. Test Utilities
 **Files**:
-- `test_ercot_api.py` - ERCOT API endpoint testing
-- `test_ercot_public.py` - Public ERCOT data validation
-- `test_ercot_raw.py` - Raw CSV processing
-- `test_library_detection.py` - Library dependency checks
-- `test_library_integration.py` - Integration testing
-- `test_professional_monte_carlo.py` - Monte Carlo validation
-- `find_load_zones.py` - ERCOT zone mapping
-- `inspect_ercot_csv.py` - CSV structure analysis
+- `scripts/ercot/test_ercot_api.py` - ERCOT API endpoint testing
+- `scripts/ercot/test_ercot_public.py` - Public ERCOT data validation
+- `scripts/ercot/test_ercot_raw.py` - Raw CSV processing
+- `scripts/monte_carlo/test_library_detection.py` - Library dependency checks
+- `scripts/monte_carlo/test_library_integration.py` - Integration testing
+- `scripts/monte_carlo/test_professional_monte_carlo.py` - Monte Carlo validation
+- `scripts/ercot/find_load_zones.py` - ERCOT zone mapping
+- `scripts/ercot/inspect_ercot_csv.py` - CSV structure analysis
 
 ---
 
@@ -133,14 +133,14 @@ python3 scripts/verify_data.py
 ```
 scripts/seed_market_data.py          # Synthetic data generator
 scripts/verify_data.py               # Data verification tool
-test_ercot_api.py                    # ERCOT API tests
-test_ercot_public.py                 # Public API validation
-test_ercot_raw.py                    # CSV processing tests
-test_library_detection.py            # Dependency checks
-test_library_integration.py          # Integration tests
-test_professional_monte_carlo.py     # Monte Carlo validation
-find_load_zones.py                   # Zone mapping utility
-inspect_ercot_csv.py                 # CSV inspection tool
+scripts/ercot/test_ercot_api.py      # ERCOT API tests
+scripts/ercot/test_ercot_public.py   # Public API validation
+scripts/ercot/test_ercot_raw.py      # CSV processing tests
+scripts/monte_carlo/test_library_detection.py        # Dependency checks
+scripts/monte_carlo/test_library_integration.py      # Integration tests
+scripts/monte_carlo/test_professional_monte_carlo.py # Monte Carlo validation
+scripts/ercot/find_load_zones.py     # Zone mapping utility
+scripts/ercot/inspect_ercot_csv.py   # CSV inspection tool
 ```
 
 ### Commits

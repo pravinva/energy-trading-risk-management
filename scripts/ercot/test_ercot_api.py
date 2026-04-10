@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Quick test script to verify ERCOT API connectivity
-Run: python test_ercot_api.py
+Run: python scripts/ercot/test_ercot_api.py
 """
 import asyncio
 from datetime import datetime, timedelta

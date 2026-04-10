@@ -3,9 +3,10 @@
 Direct ERCOT API test with various authentication methods
 """
 import asyncio
+import os
 import httpx
 
-API_KEY = "b1ed1b2bf84a42f5851e05f7f21b049d"
+API_KEY = os.getenv("ERCOT_API_KEY", "")
 
 async def test_ercot_endpoints():
     """Test different ERCOT API endpoints and auth methods"""
@@ -14,6 +15,12 @@ async def test_ercot_endpoints():
         print("=" * 70)
         print("ERCOT API Direct Test - Testing Authentication Methods")
         print("=" * 70)
+        print()
+
+        if API_KEY:
+            print("Using ERCOT API key from ERCOT_API_KEY environment variable")
+        else:
+            print("No ERCOT_API_KEY set; authenticated endpoint tests may return 401/403")
         print()
 
         # Test 1: Try with Ocp-Apim-Subscription-Key header

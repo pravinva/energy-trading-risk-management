@@ -395,7 +395,7 @@ pip install stochastic numba scipy pandas numpy
 
 ### Verification
 ```bash
-python test_professional_monte_carlo.py
+python scripts/monte_carlo/test_professional_monte_carlo.py
 ```
 
 Expected output:

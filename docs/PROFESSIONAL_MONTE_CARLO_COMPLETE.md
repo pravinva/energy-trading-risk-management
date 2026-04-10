@@ -266,7 +266,7 @@ numba>=0.58.0
 
 ### Verify Installation
 ```bash
-python test_library_integration.py
+python scripts/monte_carlo/test_library_integration.py
 ```
 
 Expected output:
