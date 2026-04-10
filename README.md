@@ -1,51 +1,51 @@
-# APEX Energy Trading & Risk Management Platform
+# APEX Energy Trading and Risk Management Platform
 
-APEX is a Databricks App for energy trading and risk operations across ANZ, Europe, and Americas market contexts. It ships as a single project containing a FastAPI backend, React/Vite frontend, ingestion jobs, SQL bootstrap assets, and Databricks bundle configuration.
+APEX is a Databricks App for wholesale power trading and risk operations across three markets.  
+It combines a FastAPI backend, a React/Vite frontend, Databricks Workflows ingestion jobs, and Unity Catalog data models into one deployable platform.
 
-## What This App Does
+## Platform Overview
 
-APEX provides persona-based workspaces for end-to-end energy trading operations:
+APEX is designed for day-to-day commercial and operational workflows:
 
-- Dispatch decisions and offer-stack analysis
-- Trading blotter, exposure, and market monitoring
-- VaR, stress testing, credit exposure, and limit monitoring
-- Quant model performance, lineage, and strategy backtests
-- Portfolio revenue stacking, PPA valuation, and benchmarking
+- Real-time market and portfolio monitoring
+- Trade blotter and exposure management
+- Risk analytics (VaR, stress, limits, credit)
+- Quant workflows (model performance, lineage, backtests)
+- Portfolio optimization and revenue stacking
 
-Details:
-- Capability deep-dive: `docs/APEX_MODULAR_ARCHITECTURE.md`
-- Risk function coverage: `docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md`
-- Screen and panel parity matrix: `docs/APEX_SCREEN_PARITY_MATRIX.md`
+For full capability detail, see:
+- [Architecture](docs/APEX_MODULAR_ARCHITECTURE.md)
+- [Risk Capabilities](docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md)
 
-## Markets Supported
+## Markets Covered
 
-The app is built to operate across three power markets:
+The application currently supports:
 
 - `NEM` (Australia / ANZ)
 - `EPEX` (Europe)
 - `ERCOT` (Texas / Americas)
 
-Market data ingestion and job behavior:
-- Ingestion summary: `docs/INGESTION_JOBS_SUMMARY.md`
-- Jobs technical detail: `jobs/README.md`
+Operational market-data details:
+- [Ingestion Jobs Summary](docs/INGESTION_JOBS_SUMMARY.md)
+- [Jobs Deep-Dive](jobs/README.md)
 
 ## Persona Workspaces and UI
 
-APEX UI is organized around five personas (each available per market context):
+APEX UI is persona-driven, with consistent role-based screens per market:
 
-- `Dispatch Operator` (`/workspace/dispatch`): fleet monitor, pre-dispatch strip, offer stack builder, ML recommendations
-- `Power Trader` (`/workspace/trading`): flow summary, market snapshot, position book, exposure, trade blotter
-- `Risk Manager` (`/workspace/risk`): VaR dashboard, stress scenarios, limit monitor, credit exposure
-- `Quant Developer` (`/workspace/quant`): model performance, model lineage, strategy backtests, forecast-vs-actual
-- `Portfolio Manager` (`/workspace/portfolio`): revenue stacking simulator, PPA book, asset benchmarking
+- `Dispatch Operator` (`/workspace/dispatch`): fleet monitor, pre-dispatch strip, offer-stack builder, recommendations
+- `Power Trader` (`/workspace/trading`): market snapshot, positions, exposure, blotter
+- `Risk Manager` (`/workspace/risk`): VaR dashboard, stress scenarios, limits, credit exposure
+- `Quant Developer` (`/workspace/quant`): model metrics, lineage, strategy backtests, forecast diagnostics
+- `Portfolio Manager` (`/workspace/portfolio`): revenue stacking, PPA book, asset benchmarking
 
-UI alignment reference:
-- Persona and panel mapping: `docs/APEX_SCREEN_PARITY_MATRIX.md`
-- Data visibility notes: `docs/SCREEN_DATA_STATUS.md`
+UI references:
+- [UI and Persona Matrix](docs/APEX_SCREEN_PARITY_MATRIX.md)
+- [Screen Data Status](docs/SCREEN_DATA_STATUS.md)
 
-## Current Runtime Architecture
+## Runtime Architecture
 
-```
+```text
 React + Vite frontend (app/frontend)
         |
         v
@@ -56,74 +56,95 @@ Unity Catalog (apex_fresh.* schemas)
         |
         +--> Databricks Workflows jobs (jobs/ingestion/*)
         |
-        +--> Analytics/risk/portfolio APIs
-
-Deployment plane:
-Local repo -> Workspace path (/Workspace/Users/<user>/apex-etrm)
-          -> Databricks App (apex-etrm)
-          -> URL: https://apex-etrm-1444828305810485.aws.databricksapps.com/
+        +--> Analytics, risk, and portfolio APIs
 ```
 
-## Repository Layout
+Deployment plane:
 
-- `app/`: backend service, frontend UI, static build artifacts, plugin hooks
-- `jobs/`: ingestion and analytics workflow code
-- `sql/setup/`: catalog/schema/table bootstrap SQL
-- `data/`: query templates, seeds, and schema data helpers
-- `docs/`: architecture and operational documentation
-- `databricks.yml`: primary bundle (app + jobs resources)
+```text
+Local repo
+  -> /Workspace/Users/<user>/apex-etrm
+  -> Databricks App: apex-etrm
+```
 
-Repository architecture reference:
-- `docs/APEX_MODULAR_ARCHITECTURE.md`
+Architecture detail: [APEX Modular Architecture](docs/APEX_MODULAR_ARCHITECTURE.md)
+
+## Repository Structure
+
+- `app/` - backend services, frontend UI, static assets, integration hooks
+- `jobs/` - ingestion and analytics workflow code
+- `sql/setup/` - catalog/schema/table bootstrap SQL
+- `data/` - query templates, seeds, and data helpers
+- `docs/` - architecture and operational documentation
+- `databricks.yml` - primary bundle definition
 
 ## Local Development
 
-1. Install Python and Node dependencies:
+1. Install dependencies:
    - `pip install -r requirements.txt`
    - `cd app/frontend && npm install`
-2. Start backend:
+2. Run backend:
    - `uvicorn app.backend.app:app --reload`
-3. Start frontend dev server in a second terminal:
+3. Run frontend:
    - `cd app/frontend && npm run dev`
 
-## Deployment (Current)
+## Dependency Files
 
-Use the workspace/app profile that targets `https://e2-demo-field-eng.cloud.databricks.com`.
+This repository intentionally separates dependency scopes:
 
-1. Sync source to workspace:
+- `requirements.txt`  
+  Primary app/backend dependency set for standard development and deployment.
+
+- `requirements-monte-carlo.txt`  
+  Optional advanced quantitative stack for professional Monte Carlo and analytics workflows.
+
+- `apex_fresh/remote_app/requirements.txt`  
+  Minimal dependency set for the alternate `apex_fresh/remote_app` runtime path.
+
+Install patterns:
+
+- Main app: `pip install -r requirements.txt`
+- Main app with quant extras: `pip install -r requirements.txt -r requirements-monte-carlo.txt`
+- Alternate remote app path: `pip install -r apex_fresh/remote_app/requirements.txt`
+
+## Deployment
+
+Target workspace profile should match your destination Databricks workspace.
+
+1. Sync source:
    - `databricks sync . /Workspace/Users/<your-user>/apex-etrm -p DEFAULT`
-2. Deploy app from workspace source:
+2. Deploy app:
    - `databricks apps deploy apex-etrm --source-code-path /Workspace/Users/<your-user>/apex-etrm -p DEFAULT`
-3. Verify status:
+3. Verify:
    - `databricks apps get apex-etrm -p DEFAULT`
 
-Deployment runbook for new workspaces:
-- `docs/APEX_Deployment_Runbook_Other_Workspace.pdf`
+Deployment guide:
+- [Deployment Runbook (PDF)](docs/APEX_Deployment_Runbook_Other_Workspace.pdf)
 
 ## Data Platform
 
 - Primary catalog: `apex_fresh`
-- Bootstrap scripts: `sql/setup/`
+- Bootstrap SQL: `sql/setup/`
 - Setup utility: `scripts/setup_database.py`
-- Seed and data notes: `data/README.md`
+- Seed notes: `data/README.md`
 
-Data model references:
-- Database summary: `docs/DATABASE_SCHEMA_SUMMARY.md`
-- Setup order and SQL details: `sql/setup/README.md`
+Data references:
+- [Database Summary](docs/DATABASE_SCHEMA_SUMMARY.md)
+- [SQL Setup Guide](sql/setup/README.md)
 
 ## API Surface (High Level)
 
-- Market data: `/api/v1/market/*`, `/api/v1/nemweb/*`, `/api/v1/epex/*`, `/api/v1/ercot/*`
+- Market: `/api/v1/market/*`, `/api/v1/nemweb/*`, `/api/v1/epex/*`, `/api/v1/ercot/*`
 - Trading and dispatch: `/api/v1/trades/*`, `/api/v1/dispatch/*`, `/api/v1/positions/*`
 - Risk and portfolio: `/api/v1/risk/*`, `/api/v1/portfolio/*`, `/api/v1/portfolio-optimization/*`
 - Forecasting and analytics: `/api/v1/forecasting/*`, `/api/v1/analytics/*`
 
-## Documentation Index
+## Documentation
 
-- Docs landing page: `docs/README.md`
-- Architecture: `docs/APEX_MODULAR_ARCHITECTURE.md`
-- Risk capabilities: `docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md`
-- UI/persona matrix: `docs/APEX_SCREEN_PARITY_MATRIX.md`
-- Database summary: `docs/DATABASE_SCHEMA_SUMMARY.md`
-- Ingestion jobs summary: `docs/INGESTION_JOBS_SUMMARY.md`
-- Jobs deep-dive: `jobs/README.md`
+- [Docs Landing Page](docs/README.md)
+- [Architecture](docs/APEX_MODULAR_ARCHITECTURE.md)
+- [Risk Capabilities](docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md)
+- [UI and Persona Matrix](docs/APEX_SCREEN_PARITY_MATRIX.md)
+- [Database Summary](docs/DATABASE_SCHEMA_SUMMARY.md)
+- [Ingestion Jobs Summary](docs/INGESTION_JOBS_SUMMARY.md)
+- [Jobs Deep-Dive](jobs/README.md)
