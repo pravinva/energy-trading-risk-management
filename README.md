@@ -1,60 +1,129 @@
 # APEX Energy Trading & Risk Management Platform
 
-APEX is a Databricks Apps-based energy trading and risk management platform with persona workspaces for dispatch, trading, risk, quant, and portfolio workflows. It combines a FastAPI backend, a React/TypeScript frontend, and Lakebase-oriented operational storage into one deployable application via Databricks Asset Bundles.
+APEX is a Databricks App for energy trading and risk operations across ANZ, Europe, and Americas market contexts. It ships as a single project containing a FastAPI backend, React/Vite frontend, ingestion jobs, SQL bootstrap assets, and Databricks bundle configuration.
 
-## Architecture
+## What This App Does
+
+APEX provides persona-based workspaces for end-to-end energy trading operations:
+
+- Dispatch decisions and offer-stack analysis
+- Trading blotter, exposure, and market monitoring
+- VaR, stress testing, credit exposure, and limit monitoring
+- Quant model performance, lineage, and strategy backtests
+- Portfolio revenue stacking, PPA valuation, and benchmarking
+
+Details:
+- Capability deep-dive: `docs/APEX_MODULAR_ARCHITECTURE.md`
+- Risk function coverage: `docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md`
+- Screen and panel parity matrix: `docs/APEX_SCREEN_PARITY_MATRIX.md`
+
+## Markets Supported
+
+The app is built to operate across three power markets:
+
+- `NEM` (Australia / ANZ)
+- `EPEX` (Europe)
+- `ERCOT` (Texas / Americas)
+
+Market data ingestion and job behavior:
+- Ingestion summary: `docs/INGESTION_JOBS_SUMMARY.md`
+- Jobs technical detail: `jobs/README.md`
+
+## Persona Workspaces and UI
+
+APEX UI is organized around five personas (each available per market context):
+
+- `Dispatch Operator` (`/workspace/dispatch`): fleet monitor, pre-dispatch strip, offer stack builder, ML recommendations
+- `Power Trader` (`/workspace/trading`): flow summary, market snapshot, position book, exposure, trade blotter
+- `Risk Manager` (`/workspace/risk`): VaR dashboard, stress scenarios, limit monitor, credit exposure
+- `Quant Developer` (`/workspace/quant`): model performance, model lineage, strategy backtests, forecast-vs-actual
+- `Portfolio Manager` (`/workspace/portfolio`): revenue stacking simulator, PPA book, asset benchmarking
+
+UI alignment reference:
+- Persona and panel mapping: `docs/APEX_SCREEN_PARITY_MATRIX.md`
+- Data visibility notes: `docs/SCREEN_DATA_STATUS.md`
+
+## Current Runtime Architecture
 
 ```
-[React + Vite frontend] -> [FastAPI API + static host] -> [Lakebase Postgres]
-                                      |
-                                      v
-                           [Databricks Apps Runtime]
-                                      |
-                                      v
-                           [Databricks Asset Bundles]
+React + Vite frontend (app/frontend)
+        |
+        v
+FastAPI backend (app/backend)
+        |
+        v
+Unity Catalog (apex_fresh.* schemas)
+        |
+        +--> Databricks Workflows jobs (jobs/ingestion/*)
+        |
+        +--> Analytics/risk/portfolio APIs
+
+Deployment plane:
+Local repo -> Workspace path (/Workspace/Users/<user>/apex-etrm)
+          -> Databricks App (apex-etrm)
+          -> URL: https://apex-etrm-1444828305810485.aws.databricksapps.com/
 ```
+
+## Repository Layout
+
+- `app/`: backend service, frontend UI, static build artifacts, plugin hooks
+- `jobs/`: ingestion and analytics workflow code
+- `sql/setup/`: catalog/schema/table bootstrap SQL
+- `data/`: query templates, seeds, and schema data helpers
+- `docs/`: architecture and operational documentation
+- `databricks.yml`: primary bundle (app + jobs resources)
+
+Repository architecture reference:
+- `docs/APEX_MODULAR_ARCHITECTURE.md`
 
 ## Local Development
 
-1. Ensure Python 3.11 and Node 20 are installed.
-2. Install Python deps: `pip install -r requirements.txt`
-3. Install frontend deps: `cd app/frontend && npm install`
-4. Start backend: `uvicorn app.backend.app:app --reload`
-5. In another shell, start frontend dev server: `cd app/frontend && npm run dev`
+1. Install Python and Node dependencies:
+   - `pip install -r requirements.txt`
+   - `cd app/frontend && npm install`
+2. Start backend:
+   - `uvicorn app.backend.app:app --reload`
+3. Start frontend dev server in a second terminal:
+   - `cd app/frontend && npm run dev`
 
-## Data Re-Seeding
+## Deployment (Current)
 
-Data schema and seed flow are documented in `data/README.md`.
+Use the workspace/app profile that targets `https://e2-demo-field-eng.cloud.databricks.com`.
 
-## Deployment (DAB)
+1. Sync source to workspace:
+   - `databricks sync . /Workspace/Users/<your-user>/apex-etrm -p DEFAULT`
+2. Deploy app from workspace source:
+   - `databricks apps deploy apex-etrm --source-code-path /Workspace/Users/<your-user>/apex-etrm -p DEFAULT`
+3. Verify status:
+   - `databricks apps get apex-etrm -p DEFAULT`
 
-1. Authenticate Databricks CLI profile: `databricks auth login https://fe-sandbox-serverless-sandbox-tladem.cloud.databricks.com --profile fe-vm`
-2. Validate bundle: `databricks bundle validate --profile fe-vm`
-3. Deploy to dev target: `databricks bundle deploy -t dev --profile fe-vm`
-4. Deploy app: `databricks apps deploy nexus-energy-trading-app --profile fe-vm`
+Deployment runbook for new workspaces:
+- `docs/APEX_Deployment_Runbook_Other_Workspace.pdf`
 
-## Standalone Fresh App (New Catalog)
+## Data Platform
 
-For the clean implementation path that does not modify the existing app:
+- Primary catalog: `apex_fresh`
+- Bootstrap scripts: `sql/setup/`
+- Setup utility: `scripts/setup_database.py`
+- Seed and data notes: `data/README.md`
 
-- App package: `apex_fresh/`
-- New catalog: `apex_fresh`
-- Ordered workflow runner: `python -m apex_fresh.scripts.run_w04_w05_w03`
-- Databricks bundle: `databricks.apex-fresh.yml`
-- App config: `app.apex-fresh.yaml`
+Data model references:
+- Database summary: `docs/DATABASE_SCHEMA_SUMMARY.md`
+- Setup order and SQL details: `sql/setup/README.md`
 
-This path enforces `W04` before `W05`, and `W05` before `W03` simulator startup.
+## API Surface (High Level)
 
-## APEX API Surface
+- Market data: `/api/v1/market/*`, `/api/v1/nemweb/*`, `/api/v1/epex/*`, `/api/v1/ercot/*`
+- Trading and dispatch: `/api/v1/trades/*`, `/api/v1/dispatch/*`, `/api/v1/positions/*`
+- Risk and portfolio: `/api/v1/risk/*`, `/api/v1/portfolio/*`, `/api/v1/portfolio-optimization/*`
+- Forecasting and analytics: `/api/v1/forecasting/*`, `/api/v1/analytics/*`
 
-- `GET /api/v1/market/*` market summary, current prices, predispatch, forward curves
-- `POST /api/v1/trades/entry` and `GET /api/v1/trades/blotter`
-- `GET /api/v1/positions/book`
-- `POST /api/v1/dispatch/offer-stack`, `GET /api/v1/dispatch/recommendations/{asset_id}`
-- `POST /api/v1/risk/var/calculate`, `GET /api/v1/risk/limits/status`
-- `GET /api/v1/portfolio/revenue-stacking`, `GET /api/v1/portfolio/ppa-book`
-- `GET /api/v1/analytics/model-performance`, `GET /api/v1/analytics/backtests`
+## Documentation Index
 
-## Plugin Interface Pattern
-
-Plugin entry points live under `app/plugins/` and are imported by feature modules. Each plugin should expose a typed integration boundary so private integrations can be added without changing public frontend and backend contracts.
+- Docs landing page: `docs/README.md`
+- Architecture: `docs/APEX_MODULAR_ARCHITECTURE.md`
+- Risk capabilities: `docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md`
+- UI/persona matrix: `docs/APEX_SCREEN_PARITY_MATRIX.md`
+- Database summary: `docs/DATABASE_SCHEMA_SUMMARY.md`
+- Ingestion jobs summary: `docs/INGESTION_JOBS_SUMMARY.md`
+- Jobs deep-dive: `jobs/README.md`

@@ -8,7 +8,7 @@ command:
 
 env:
   - name: DATABRICKS_SQL_WAREHOUSE_ID
-    value: a62624c51dced859
+    value: 4b9b953939869799
   - name: APEX_CATALOG
     value: apex_fresh
   - name: DATABRICKS_WORKSPACE_URL

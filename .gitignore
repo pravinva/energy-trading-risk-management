@@ -5,3 +5,5 @@ dist/
 .venv/
 *.pyc
 .DS_Store
+.cursor/
+docs/SCREEN_VISIBILITY_REPORT.md

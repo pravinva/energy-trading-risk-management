@@ -11,18 +11,34 @@ const riskItemsPrimary = [
   { to: '/workspace/risk/credit-exposure', label: 'Credit Exposure' },
 ];
 
-const navByPersona = {
+// Market-specific navigation for Quant persona Data section
+const quantDataByMarket = {
+  NEM: [
+    { to: '/workspace/quant', label: 'Price History' },
+    { to: '/workspace/quant', label: 'FCAS Analysis' }, // Australia-specific: Frequency Control Ancillary Services
+  ],
+  ERCOT: [
+    { to: '/workspace/quant', label: 'Price History' },
+    { to: '/workspace/quant', label: 'Ancillary Services' }, // Texas: Regulation, Responsive Reserve, Non-Spinning
+  ],
+  EPEX: [
+    { to: '/workspace/quant', label: 'Price History' },
+    { to: '/workspace/quant', label: 'Market Coupling' }, // Europe: Day-ahead, Intraday, Balancing
+  ],
+} as const;
+
+const getNavByPersona = (market: 'NEM' | 'EPEX' | 'ERCOT') => ({
   dispatch: {
-    sectionA: 'Analytics',
-    itemsA: [{ to: '/workspace/dispatch', label: 'Fleet Monitor' }, { to: '/workspace/dispatch', label: 'Stack Analytics' }],
-    sectionB: 'Models',
-    itemsB: [{ to: '/workspace/dispatch', label: 'Recommendation Insights' }, { to: '/workspace/dispatch', label: 'History' }],
+    sectionA: 'Dispatch',
+    itemsA: [{ to: '/workspace/dispatch', label: 'Console' }, { to: '/workspace/dispatch', label: 'Fleet Overview' }],
+    sectionB: 'Assets',
+    itemsB: [{ to: '/workspace/dispatch', label: 'Fleet' }, { to: '/workspace/dispatch', label: 'Stack History' }],
   },
   trader: {
-    sectionA: 'Analytics',
-    itemsA: [{ to: '/workspace/trading', label: 'Flow Summary' }, { to: '/workspace/trading', label: 'Position Exposure' }, { to: '/workspace/trading', label: 'Flow Tape' }],
+    sectionA: 'Trading Analytics',
+    itemsA: [{ to: '/workspace/trading', label: 'Overview' }, { to: '/workspace/trading', label: 'Position Book' }, { to: '/workspace/trading', label: 'Trade Blotter' }],
     sectionB: 'Views',
-    itemsB: [{ to: '/workspace/trading', label: 'By Region' }, { to: '/workspace/trading', label: 'Risk Heatmap' }],
+    itemsB: [{ to: '/workspace/trading', label: 'By Region' }, { to: '/workspace/trading', label: 'P&L Attribution' }],
   },
   risk: {
     sectionA: 'Risk',
@@ -34,7 +50,7 @@ const navByPersona = {
     sectionA: 'Research',
     itemsA: [{ to: '/workspace/quant', label: 'Model Performance' }, { to: '/workspace/quant', label: 'Backtest Console' }, { to: '/workspace/quant', label: 'Signal Scanner' }],
     sectionB: 'Data',
-    itemsB: [{ to: '/workspace/quant', label: 'Price History' }, { to: '/workspace/quant', label: 'FCAS Analysis' }],
+    itemsB: quantDataByMarket[market],
   },
   portfolio: {
     sectionA: 'Revenue',
@@ -42,11 +58,11 @@ const navByPersona = {
     sectionB: 'PPA',
     itemsB: [{ to: '/workspace/portfolio', label: 'PPA Book' }, { to: '/workspace/portfolio', label: 'Payoff Analysis' }],
   },
-};
+});
 
 const personaLabel = {
-  dispatch: 'Dispatch Analyst',
-  trader: 'Trading Analyst',
+  dispatch: 'Dispatch Operator',
+  trader: 'Power Trader',
   risk: 'Risk Manager',
   quant: 'Quant Developer',
   portfolio: 'Portfolio Manager',
@@ -86,7 +102,7 @@ export function ApexWorkspaceLayout(): JSX.Element {
   }, [location.pathname, setPersona]);
 
   const tickerRows = (prices.data ?? []).filter((row) => row.market === market).slice(0, 4);
-  const navConfig = navByPersona[persona];
+  const navConfig = getNavByPersona(market)[persona];
   const email = (user.data as { data?: { email?: string } } | undefined)?.data?.email ?? '';
   const userLabel = email ? email.split('@')[0] : 'workspace-user';
 

@@ -1,0 +1,91 @@
+name: "ERCOT Day-Ahead Market Ingestion"
+description: "Ingests ERCOT DAM prices daily after auction clears (around 1:30 PM CT)"
+
+schedule:
+  quartz_cron_expression: "0 45 13 * * ?"  # 1:45 PM Central Time daily
+  timezone_id: "America/Chicago"
+  pause_status: "UNPAUSED"
+
+email_notifications:
+  on_failure:
+    - trading-ops@company.com
+
+max_concurrent_runs: 1
+
+tasks:
+  - task_key: "ingest_ercot_dam_busavg"
+    description: "Ingest DAM prices for system average"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_dam"
+      parameters:
+        - "--settlement-point"
+        - "HB_BUSAVG"
+    new_cluster:
+      spark_version: "13.3.x-scala2.12"
+      node_type_id: "i3.xlarge"
+      num_workers: 2
+    timeout_seconds: 1800
+    max_retries: 3
+
+  - task_key: "ingest_ercot_dam_all_hubs"
+    description: "Ingest DAM prices for all major hubs"
+    depends_on:
+      - task_key: "ingest_ercot_dam_busavg"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_dam_batch"
+      parameters:
+        - "--settlement-points"
+        - "HB_NORTH,HB_SOUTH,HB_WEST,HB_HOUSTON,HB_PAN"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 1800
+    max_retries: 3
+
+  - task_key: "ingest_ercot_load_forecast"
+    description: "Ingest system load forecast"
+    depends_on:
+      - task_key: "ingest_ercot_dam_all_hubs"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_load_forecast"
+      parameters:
+        - "--forecast-type"
+        - "SHORT_TERM"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 1800
+    max_retries: 2
+
+  - task_key: "ingest_ercot_wind_generation"
+    description: "Ingest actual wind generation data"
+    depends_on:
+      - task_key: "ingest_ercot_load_forecast"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_renewable"
+      parameters:
+        - "--fuel-type"
+        - "WIND"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 1800
+    max_retries: 2
+
+  - task_key: "ingest_ercot_solar_generation"
+    description: "Ingest actual solar generation data"
+    depends_on:
+      - task_key: "ingest_ercot_wind_generation"
+    python_wheel_task:
+      package_name: "apex_trading"
+      entry_point: "ercot_ingest_renewable"
+      parameters:
+        - "--fuel-type"
+        - "SOLAR"
+    existing_cluster_id: "{{cluster_id}}"
+    timeout_seconds: 1800
+    max_retries: 2
+
+tags:
+  market: "ERCOT"
+  data_source: "ERCOT_API"
+  frequency: "daily"
+  environment: "production"

@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ['http://localhost:5173']
     nexus_dev_user_email: str | None = None
 
+    # Market data API keys
+    entsoe_api_key: str = ''  # ENTSOE Transparency Platform API key for EPEX data
+    ercot_api_key: str | None = None  # ERCOT API key (optional for public data)
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()

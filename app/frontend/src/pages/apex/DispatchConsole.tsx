@@ -3,6 +3,8 @@ import { DataTable, Panel } from '@/components/primitives';
 import { useDispatchAssets, useDispatchRecommendation, useDispatchServiceTypes, useDispatchStackHistory, useForecastMetadata, useLatestOfferStack, useMarketSummary, useModelLineage, usePredispatch } from '@/api/hooks/apex';
 import { useDispatchStore } from '@/store/dispatchStore';
 import { useTradingStore } from '@/store/tradingStore';
+import { Tooltip } from '@/components/Tooltip';
+import { getMetricInfo } from '@/config/dataDictionary';
 
 export function DispatchConsole(): JSX.Element {
   const { assetId, serviceType, setBands, setAssetId, setServiceType } = useDispatchStore();
@@ -72,7 +74,7 @@ export function DispatchConsole(): JSX.Element {
         </div>
       </Panel>
 
-      <Panel persona="dispatch" title="Offer Stack Analytics" subtitle={`${assetId} · ${serviceType}`}>
+      <Panel persona="dispatch" title="Offer Stack Builder" subtitle={`${assetId} · ${serviceType}`}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
           <select value={assetId} onChange={(e) => setAssetId(e.target.value)}>
             {assets.map((asset) => <option key={asset}>{asset}</option>)}
@@ -85,9 +87,20 @@ export function DispatchConsole(): JSX.Element {
           <DataTable
             data={latestBands.map((band) => ({ band: `Band ${band.band_index}`, price: band.price, volume: band.volume_mw }))}
             columns={[
-              { header: 'Band', accessorKey: 'band' },
-              { header: 'Price', accessorKey: 'price', meta: { kind: 'price' } },
-              { header: 'Volume', accessorKey: 'volume', meta: { kind: 'mw' } },
+              {
+                header: () => <Tooltip {...getMetricInfo('offer_band')!}>Band</Tooltip>,
+                accessorKey: 'band'
+              },
+              {
+                header: () => <Tooltip {...getMetricInfo('band_price')!}>Price</Tooltip>,
+                accessorKey: 'price',
+                meta: { kind: 'price' }
+              },
+              {
+                header: () => <Tooltip {...getMetricInfo('band_volume')!}>Volume</Tooltip>,
+                accessorKey: 'volume',
+                meta: { kind: 'mw' }
+              },
             ]}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', padding: 8 }}>
@@ -102,7 +115,7 @@ export function DispatchConsole(): JSX.Element {
       </Panel>
 
       <div style={{ display: 'grid', gap: 10 }}>
-        <Panel persona="dispatch" title="ML Recommendation Insights">
+        <Panel persona="dispatch" title="ML Recommendations">
           <div className="font-data">Suggested Action: {recommendation.data?.action ?? '--'}</div>
           <div className="font-data">Suggested Target MW: {recommendation.data?.target_mw?.toFixed(2) ?? '--'}</div>
           <div className="font-data">Confidence Score: {recommendation.data?.confidence?.toFixed(2) ?? '--'}</div>
