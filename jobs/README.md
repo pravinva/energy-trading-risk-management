@@ -195,5 +195,6 @@ Check data source availability:
 
 - Ingestion Services: `app/backend/{nemweb,epex,ercot}/ingestion.py`
 - API Clients: `app/backend/{nemweb,epex,ercot}/client.py`
-- Database Schema: `DATABASE_SCHEMA_SUMMARY.md`
+- Database Schema: `docs/DATABASE_SCHEMA_SUMMARY.md`
+- Ingestion Summary: `docs/INGESTION_JOBS_SUMMARY.md`
 - Deployment Guide: `databricks.yml`

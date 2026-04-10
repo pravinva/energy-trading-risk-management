@@ -1,0 +1,28 @@
+# Documentation Index
+
+Core documentation is centralized in this `docs/` directory.
+
+## Architecture
+
+- `APEX_MODULAR_ARCHITECTURE.md`
+- `ARCHITECTURE_DIAGRAMS_README.md`
+- `APEX_RISK_MANAGEMENT_CAPABILITIES.md`
+
+## Platform and Data
+
+- `DATABASE_SCHEMA_SUMMARY.md`
+- `INGESTION_JOBS_SUMMARY.md`
+- `SCREEN_DATA_STATUS.md`
+- `SCREEN_VISIBILITY_REPORT.md`
+- `APEX_SCREEN_PARITY_MATRIX.md`
+
+## UX and Design
+
+- `DESIGN_SYSTEM_UPDATE.md`
+- `COLOR_REFERENCE.md`
+
+## Simulation and Modeling
+
+- `MONTE_CARLO_SIMULATIONS.md`
+- `PROFESSIONAL_MONTE_CARLO_IMPLEMENTATION.md`
+- `PROFESSIONAL_MONTE_CARLO_COMPLETE.md`
