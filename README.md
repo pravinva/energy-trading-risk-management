@@ -94,6 +94,12 @@ Local repo
 
 Architecture detail: [APEX Modular Architecture](docs/APEX_MODULAR_ARCHITECTURE.md)
 
+### Executive Architecture Diagram
+
+<p align="center">
+  <img src="docs/apex_etrm_executive_architecture_databricks_only.png" alt="APEX executive architecture diagram" width="980">
+</p>
+
 ## Repository Structure
 
 - `app/` - backend services, frontend UI, static assets, integration hooks
