@@ -1,7 +1,28 @@
-# APEX Energy Trading and Risk Management Platform
+<h1 align="center">APEX Energy Trading and Risk Management Platform</h1>
 
-APEX is a Databricks App for wholesale power trading and risk operations across three markets.  
-It combines a FastAPI backend, a React/Vite frontend, Databricks Workflows ingestion jobs, and Unity Catalog data models into one deployable platform.
+<p align="center">
+  <b>Airflow-style operational simplicity for energy trading workflows</b> — run dispatch, trading, risk, quant, and portfolio personas on one Databricks-native app across NEM, EPEX, and ERCOT.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=111827" alt="React Vite">
+  <img src="https://img.shields.io/badge/Databricks-Apps-E36209?logo=databricks&logoColor=white" alt="Databricks Apps">
+  <img src="https://img.shields.io/badge/Markets-NEM%20%7C%20EPEX%20%7C%20ERCOT-7C3AED" alt="Markets">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-16A34A" alt="License">
+  <img src="https://img.shields.io/badge/Tests-Configured-0EA5E9" alt="Tests">
+</p>
+
+<p align="center">
+  <a href="docs/APEX_NEM_PERSONA_DAY_IN_LIFE.pdf"><b>NEM Day in the Life (PDF)</b></a>
+  &nbsp;|&nbsp;
+  <a href="docs/APEX_EPEX_PERSONA_DAY_IN_LIFE.pdf"><b>EPEX Day in the Life (PDF)</b></a>
+  &nbsp;|&nbsp;
+  <a href="docs/APEX_ERCOT_PERSONA_DAY_IN_LIFE.pdf"><b>ERCOT Day in the Life (PDF)</b></a>
+</p>
+
+APEX is a Databricks App for wholesale power trading and risk operations across three markets. It combines a FastAPI backend, a React/Vite frontend, Databricks Workflows ingestion jobs, and Unity Catalog data models into one deployable platform.
 
 ## Platform Overview
 
