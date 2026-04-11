@@ -41,3 +41,49 @@ CREATE TABLE IF NOT EXISTS apex_fresh.portfolio.simulation_defaults (
 )
 USING DELTA
 COMMENT 'Market-specific simulation parameter defaults and limits';
+
+-- ============================================================================
+-- Reference Defaults (idempotent seeds)
+-- ============================================================================
+
+INSERT INTO apex_fresh.portfolio.revenue_rates
+SELECT 'Ancillary Services', 0.18
+WHERE NOT EXISTS (
+  SELECT 1 FROM apex_fresh.portfolio.revenue_rates
+  WHERE component = 'Ancillary Services'
+);
+
+INSERT INTO apex_fresh.portfolio.revenue_rates
+SELECT 'Capacity Daily Rate', 4.5
+WHERE NOT EXISTS (
+  SELECT 1 FROM apex_fresh.portfolio.revenue_rates
+  WHERE component = 'Capacity Daily Rate'
+);
+
+INSERT INTO apex_fresh.portfolio.revenue_rates
+SELECT 'PPA Hedge Value', 0.12
+WHERE NOT EXISTS (
+  SELECT 1 FROM apex_fresh.portfolio.revenue_rates
+  WHERE component = 'PPA Hedge Value'
+);
+
+INSERT INTO apex_fresh.portfolio.simulation_defaults
+SELECT 'NEM', 2, 8, 40, 100, 50, 300, 0.8
+WHERE NOT EXISTS (
+  SELECT 1 FROM apex_fresh.portfolio.simulation_defaults
+  WHERE upper(market) = 'NEM'
+);
+
+INSERT INTO apex_fresh.portfolio.simulation_defaults
+SELECT 'EPEX', 2, 8, 35, 100, 45, 300, 0.8
+WHERE NOT EXISTS (
+  SELECT 1 FROM apex_fresh.portfolio.simulation_defaults
+  WHERE upper(market) = 'EPEX'
+);
+
+INSERT INTO apex_fresh.portfolio.simulation_defaults
+SELECT 'ERCOT', 2, 8, 45, 100, 60, 350, 0.8
+WHERE NOT EXISTS (
+  SELECT 1 FROM apex_fresh.portfolio.simulation_defaults
+  WHERE upper(market) = 'ERCOT'
+);

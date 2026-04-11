@@ -42,6 +42,10 @@ APEX UI is persona-driven, with consistent role-based screens per market:
 UI references:
 - [UI and Persona Matrix](docs/APEX_SCREEN_PARITY_MATRIX.md)
 - [Screen Data Status](docs/SCREEN_DATA_STATUS.md)
+- [Screen Data Lineage by Market](docs/SCREEN_DATA_LINEAGE_BY_MARKET.md)
+- [NEM Persona Day in the Life](docs/APEX_NEM_PERSONA_DAY_IN_LIFE.pdf)
+- [EPEX Persona Day in the Life](docs/APEX_EPEX_PERSONA_DAY_IN_LIFE.pdf)
+- [ERCOT Persona Day in the Life](docs/APEX_ERCOT_PERSONA_DAY_IN_LIFE.pdf)
 
 ## Runtime Architecture
 
@@ -145,6 +149,10 @@ Data references:
 - [Architecture](docs/APEX_MODULAR_ARCHITECTURE.md)
 - [Risk Capabilities](docs/APEX_RISK_MANAGEMENT_CAPABILITIES.md)
 - [UI and Persona Matrix](docs/APEX_SCREEN_PARITY_MATRIX.md)
+- [Screen Data Lineage by Market](docs/SCREEN_DATA_LINEAGE_BY_MARKET.md)
+- [NEM Persona Day in the Life](docs/APEX_NEM_PERSONA_DAY_IN_LIFE.pdf)
+- [EPEX Persona Day in the Life](docs/APEX_EPEX_PERSONA_DAY_IN_LIFE.pdf)
+- [ERCOT Persona Day in the Life](docs/APEX_ERCOT_PERSONA_DAY_IN_LIFE.pdf)
 - [Database Summary](docs/DATABASE_SCHEMA_SUMMARY.md)
 - [Ingestion Jobs Summary](docs/INGESTION_JOBS_SUMMARY.md)
 - [Jobs Deep-Dive](jobs/README.md)
